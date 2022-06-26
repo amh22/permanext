@@ -1,7 +1,16 @@
-import '../styles/globals.css'
+import { ThemeProvider } from 'theme-ui'
+import Theme from '../theme'
+import Layout from '../components/layout'
+import '../styles.css'
 
-function MyApp({ Component, pageProps }) {
-  return <Component {...pageProps} />
+function App({ Component, pageProps }) {
+  return (
+    <ThemeProvider theme={Theme}>
+      <Layout>
+        <Component {...pageProps} />
+      </Layout>
+    </ThemeProvider>
+  )
 }
 
-export default MyApp
+export default App
