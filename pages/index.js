@@ -91,6 +91,7 @@ export default function Home() {
             <button onClick={uploadFile}>Upload File</button>
           </div>
           <div>{image && <Image alt='The uploaded image' src={image} width='500px' height='500px'></Image>}</div>
+          {/* display Arweave URI */}
           <div>
             {URI && <h5>View the file stored on the Arweave network:</h5>}
             {URI && <a href={URI}>{URI}</a>}
