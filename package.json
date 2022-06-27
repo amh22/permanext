@@ -9,15 +9,16 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@bundlr-network/client": "^0.7.14",
     "@emotion/react": "^11.9.3",
     "@mdx-js/react": "1.6.22",
-    "@rainbow-me/rainbowkit": "^0.3.5",
+    "arweave": "^1.11.4",
+    "bignumber.js": "^9.0.2",
     "ethers": "^5.6.9",
     "next": "12.1.6",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "theme-ui": "^0.14.6",
-    "wagmi": "^0.4.12"
+    "theme-ui": "^0.14.6"
   },
   "devDependencies": {
     "eslint": "8.18.0",
