@@ -11,10 +11,13 @@
   "dependencies": {
     "@emotion/react": "^11.9.3",
     "@mdx-js/react": "1.6.22",
+    "@rainbow-me/rainbowkit": "^0.3.5",
+    "ethers": "^5.6.9",
     "next": "12.1.6",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "theme-ui": "^0.14.6"
+    "theme-ui": "^0.14.6",
+    "wagmi": "^0.4.12"
   },
   "devDependencies": {
     "eslint": "8.18.0",
