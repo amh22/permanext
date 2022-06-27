@@ -61,6 +61,7 @@ export default function Home() {
   async function uploadFile() {
     let tx = await bundlrInstance.uploader.upload(file, [{ name: 'Content-Type', value: 'image/png' }])
     console.log('🚀 ~ uploadFile ~ tx', tx)
+    fetchBalance()
     setURI(`http://arweave.net/${tx.data.id}`)
   }
 
@@ -91,7 +92,7 @@ export default function Home() {
           </div>
           <div>{image && <Image alt='The uploaded image' src={image} width='500px' height='500px'></Image>}</div>
           <div>
-            {URI && <h5>View URI of the file stored on the Arweave network:</h5>}
+            {URI && <h5>View the file stored on the Arweave network:</h5>}
             {URI && <a href={URI}>{URI}</a>}
           </div>
         </>
