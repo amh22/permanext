@@ -1,15 +1,15 @@
 /** @jsxImportSource theme-ui */
 import { useContext, useState } from 'react'
 import BigNumber from 'bignumber.js'
+import Image from 'next/image'
 import { MainContext } from '../context'
 import ContainerPage from '../components/container-page'
 
 export default function Home() {
+  const [fundingAmount, setFundingAmount] = useState()
   const [file, setFile] = useState()
   const [image, setImage] = useState()
-  // a link for user to view the upload on the Arweave network
-  const [URI, setURI] = useState()
-  const [fundingAmount, setFundingAmount] = useState()
+  const [URI, setURI] = useState() // a link for user to view the upload on the Arweave network
 
   const { initialiseBundlr, bundlrInstance, fetchBalance, balance } = useContext(MainContext)
 
@@ -36,6 +36,34 @@ export default function Home() {
     }
   }
 
+  // handle image file upload
+  function onFileChange(e) {
+    console.log('🚀 ~ file: index.js ~ line 40 ~ onFileChange ~ e', e)
+    const file = e.target.files[0]
+    // make sure there is a file
+    if (file) {
+      // give us a nice way to VIEW the IMAGE in our UI
+      const image = URL.createObjectURL(file)
+      setImage(image)
+      // now to save the FILE locally
+      // this is the encoded file sent to Arweave
+      let reader = new FileReader()
+      reader.onload = function () {
+        if (reader.result) {
+          setFile(Buffer.from(reader.result)) // save the file locally
+        }
+      }
+      reader.readAsArrayBuffer(file)
+    }
+  }
+
+  // handle upload of image file to Arweave via bundlr
+  async function uploadFile() {
+    let tx = await bundlrInstance.uploader.upload(file, [{ name: 'Content-Type', value: 'image/png' }])
+    console.log('🚀 ~ uploadFile ~ tx', tx)
+    setURI(`http://arweave.net/${tx.data.id}`)
+  }
+
   return (
     <ContainerPage>
       <h3 sx={{ color: 'primary' }}>Landing Page: Gallery</h3>
@@ -54,6 +82,17 @@ export default function Home() {
               sx={{ width: '200px' }}
             />
             <button onClick={fundWallet}>Fund Wallet</button>
+          </div>
+          {/* file upload */}
+          <div>
+            <h5>Choose Image</h5>
+            <input type='file' onChange={onFileChange} />
+            <button onClick={uploadFile}>Upload File</button>
+          </div>
+          <div>{image && <Image alt='The uploaded image' src={image} width='500px' height='500px'></Image>}</div>
+          <div>
+            {URI && <h5>View URI of the file stored on the Arweave network:</h5>}
+            {URI && <a href={URI}>{URI}</a>}
           </div>
         </>
       )}
