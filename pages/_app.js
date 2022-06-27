@@ -1,18 +1,19 @@
 import { useState, useRef } from 'react'
 import { ThemeProvider } from 'theme-ui'
 import { WebBundlr } from '@bundlr-network/client'
-import { providers } from 'ethers'
+import { providers, utils } from 'ethers'
 import Theme from '../theme'
+import { MainContext } from '../context'
 import Layout from '../components/layout'
 import '../styles.css'
 
 function App({ Component, pageProps }) {
   const [bundlrInstance, setBundlrInstance] = useState()
-  const [balance, setBalance] = useState(0)
-
-  // set the base currency as matic (this can be changed later in the app)
-  const [currency, setCurrency] = useState('matic')
+  const [balance, setBalance] = useState()
   const bundlrRef = useRef()
+
+  // set the base currency as matic (this can be changed later via the app UI)
+  const [currency, setCurrency] = useState('matic')
 
   // create a function to connect to bundlr network
   async function initialiseBundlr() {
@@ -25,17 +26,37 @@ function App({ Component, pageProps }) {
     await bundlr.ready()
 
     setBundlrInstance(bundlr)
+
+    // set the current value of 'bundlrRef' to 'bundlr'
+    // this then allows us to grab this instance of 'bundlr'
+    // to use to update the user's bundlr balance in the fetchBalance()
+    // function below (instead of having to save the bundlr reference to state..)
     bundlrRef.current = bundlr
-    // fetchBalance()
+    fetchBalance()
+  }
+
+  async function fetchBalance() {
+    const bal = await bundlrRef.current.getLoadedBalance()
+    console.log('🚀 ~ fetchBalance ~ balance ', utils.formatEther(bal.toString()))
+    // format the returned value and store to state
+    setBalance(utils.formatEther(bal.toString()))
   }
 
   return (
-    <ThemeProvider theme={Theme}>
-      <Layout>
-        <button onClick={initialiseBundlr}>Connect Bundlr</button>
-        <Component {...pageProps} />
-      </Layout>
-    </ThemeProvider>
+    <MainContext.Provider
+      value={{
+        initialiseBundlr,
+        bundlrInstance,
+        fetchBalance,
+        balance,
+      }}
+    >
+      <ThemeProvider theme={Theme}>
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
+      </ThemeProvider>
+    </MainContext.Provider>
   )
 }
 
