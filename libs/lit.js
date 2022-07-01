@@ -56,5 +56,29 @@ class Lit {
       encryptedSymmetricKey: LitJsSdk.uint8arrayToString(encryptedSymmetricKey, 'base16'),
     }
   }
+
+  // decrypt the content
+  async decrypt(encryptedContent, encryptedSymmetricKey) {
+    if (!this.litNodeClient) {
+      await this.connect()
+    }
+
+    // First, obtain an authSig from the user. This will ask their wallet
+    // to sign a message proving they own their crypto address
+    const authSig = await LitJsSdk.checkAndSignAuthMessage({ chain })
+
+    // decrypt the encrypted symmetricKey
+    const symmetricKey = await this.litNodeClient.getEncryptionKey({
+      accessControlConditions,
+      toDecrypt: encryptedSymmetricKey,
+      chain,
+      authSig,
+    })
+
+    // decrypt the content
+    const decryptedString = await LitJsSdk.decryptString(encryptedContent, symmetricKey)
+
+    return { decryptedString }
+  }
 }
 export default new Lit()
