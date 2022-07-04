@@ -8,6 +8,7 @@ import ContainerPage from '../components/container-page'
 export default function Home() {
   const [fundingAmount, setFundingAmount] = useState()
   const [file, setFile] = useState()
+  console.log('🚀 ~ file: index.js ~ line 11 ~ Home ~ file', file)
   const [image, setImage] = useState()
   const [URI, setURI] = useState() // a link for user to view the upload on the Arweave network
 
@@ -52,6 +53,7 @@ export default function Home() {
         if (reader.result) {
           setFile(Buffer.from(reader.result)) // save the file locally
         }
+        console.log('line 56 - file:', file)
       }
       reader.readAsArrayBuffer(file)
     }
@@ -68,10 +70,11 @@ export default function Home() {
   return (
     <ContainerPage>
       <h3 sx={{ color: 'primary' }}>Landing Page: Gallery</h3>
-      {!balance && <button onClick={initialise}>Connect Bundlr</button>}
+      {!balance && <button onClick={initialise}>1. Connect Bundlr</button>}
       {balance && (
         <>
           <div>
+            <h3>1. Connect Bundlr</h3>
             <h4>You are connected to bundlr</h4>
             <h4>Your bundlr Balance: {balance}</h4>
           </div>
@@ -84,13 +87,37 @@ export default function Home() {
             />
             <button onClick={fundWallet}>Fund Wallet</button>
           </div>
-          {/* file upload */}
+
+          {/* choose file */}
           <div>
-            <h5>Choose Image</h5>
+            <h4>2. Choose Image</h4>
+            <h5>Select the image you want to upload.</h5>
             <input type='file' onChange={onFileChange} />
+            {/* <button onClick={uploadFile}>Upload File</button> */}
+          </div>
+          <div sx={{ pt: 4, border: '1px solid red' }}>
+            {image && (
+              <Image alt='The uploaded image' src={image} width='240px' height='100%'>
+                poop
+              </Image>
+            )}
+          </div>
+
+          {/* encrypt file */}
+          <div>
+            <h4>3. Encrypt Image</h4>
+            <h5>Encrypt your image.</h5>
+
+            <button>Encypt Image</button>
+          </div>
+
+          {/* upload file */}
+          <div>
+            <h4>4. Upload File</h4>
+            <h5>Upload your file to the permaweb.</h5>
             <button onClick={uploadFile}>Upload File</button>
           </div>
-          <div>{image && <Image alt='The uploaded image' src={image} width='500px' height='500px'></Image>}</div>
+
           {/* display Arweave URI */}
           <div>
             {URI && <h5>View the file stored on the Arweave network:</h5>}
