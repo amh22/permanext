@@ -1,6 +1,6 @@
 import LitJsSdk from 'lit-js-sdk'
 
-// Instantiating the Lit Client
+// ============= Instantiating the Lit Client =============
 const client = new LitJsSdk.LitNodeClient()
 const chain = 'ethereum'
 const standardContractType = 'ERC721'
@@ -19,31 +19,30 @@ const accessControlConditions = [
   },
 ]
 
-// Create a Lit class and set the litNodeClient.
+// ============= Create a Lit class and set the litNodeClient =============
 class Lit {
   litNodeClient
 
-  // connect to the client
+  // ============= Connect To The Client =============
   async connect() {
     await client.connect()
     this.litNodeClient = client
   }
 
-  // encrypt the content
+  // ============= Encrypt The Content =============
   async encrypt(content) {
     if (!this.litNodeClient) {
       await this.connect()
     }
 
-    // first obtain an authorisation signature
-    // i.e. get the user to sign a message with their wallet provider
+    // ----> first obtain an authorisation signature
+    // ----> i.e. get the user to sign a message with their wallet provider
     const authSig = await LitJsSdk.checkAndSignAuthMessage({ chain })
 
-    // encrypt the content and get the symmetricKey
+    // ----> encrypt the content and get the symmetricKey
     const { encryptedString, symmetricKey } = await LitJsSdk.encryptString(content)
 
-    // save the encrypted content, with the access control conditions
-    // to the Lit Nodes
+    // ----> save the encrypted content, with the access control conditions to the Lit Nodes
     const encryptedSymmetricKey = await this.litNodeClient.saveEncryptionKey({
       accessControlConditions,
       symmetricKey,
@@ -57,17 +56,17 @@ class Lit {
     }
   }
 
-  // decrypt the content
+  // ============= Decrypt The Content =============
   async decrypt(encryptedContent, encryptedSymmetricKey) {
     if (!this.litNodeClient) {
       await this.connect()
     }
 
-    // First, obtain an authSig from the user. This will ask their wallet
-    // to sign a message proving they own their crypto address
+    // ----> first, obtain an authSig from the user. This will ask their wallet
+    // ----> to sign a message proving they own their crypto address
     const authSig = await LitJsSdk.checkAndSignAuthMessage({ chain })
 
-    // decrypt the encrypted symmetricKey
+    // ----> decrypt the encrypted symmetricKey
     const symmetricKey = await this.litNodeClient.getEncryptionKey({
       accessControlConditions,
       toDecrypt: encryptedSymmetricKey,
@@ -75,7 +74,7 @@ class Lit {
       authSig,
     })
 
-    // decrypt the content
+    // ----> decrypt the content
     const decryptedString = await LitJsSdk.decryptString(encryptedContent, symmetricKey)
 
     return { decryptedString }

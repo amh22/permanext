@@ -1,5 +1,5 @@
 /** @jsxImportSource theme-ui */
-import ContainerFooter from './container-footer'
+import ContainerFooter from './ContainerFooter'
 
 const Footer = () => {
   return (

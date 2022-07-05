@@ -1,7 +1,7 @@
 /** @jsxImportSource theme-ui */
 import Link from 'next/link'
-import ColorModeSwitch from '../components/color-mode-switch'
-import ContainerHeader from './container-header'
+import ColorModeSwitch from './ColorModeSwitch'
+import ContainerHeader from './ContainerHeader'
 
 export default function Header({ children }) {
   return (
