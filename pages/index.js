@@ -6,6 +6,7 @@ import { MainContext } from '../context'
 import DropZone from '../components/DropZone'
 import prettyBytes from 'pretty-bytes'
 import ContainerPage from '../components/ContainerPage'
+import lit from '../libs/lit'
 
 export default function Home() {
   const [fundingAmount, setFundingAmount] = useState()
@@ -13,6 +14,8 @@ export default function Home() {
   const [fileTypeError, setFileTypeError] = useState({ error: false, message: '' })
   const [fileSize, setFileSize] = useState(null)
   const [image, setImage] = useState()
+  const [encryptedData, setEncryptedData] = useState(null)
+  const [encryptedSymmetricKey, setEncryptedSymmetricKey] = useState(null)
   const [URI, setURI] = useState() // <- a link for user to view the upload on the Arweave network
 
   const { initialiseBundlr, bundlrInstance, fetchBalance, balance } = useContext(MainContext)
@@ -40,7 +43,7 @@ export default function Home() {
     }
   }
 
-  // ============= Handle Image File Selection with DROPZONE =============
+  // ============= Handle Image File Selection with Dropezone =============
   const onDropFile = useCallback(async (acceptedFiles) => {
     const supportedFileTypes = ['image/jpeg', 'image/png'] // <- define the accepted file types
 
@@ -65,7 +68,8 @@ export default function Home() {
       console.log('🚀 ~ file: index.js ~ line 79~ image', image)
       setImage(image) // <- now to save the FILE locally
 
-      const fileReader = new FileReader() // <- we use the FileReader API to read the image as a data URL
+      // 👇 we use the FileReader API to read the image as a data URL
+      const fileReader = new FileReader()
 
       fileReader.onload = async (e) => {
         const dataURL = e.target.result
@@ -102,6 +106,45 @@ export default function Home() {
       }
       reader.readAsArrayBuffer(file)
     }
+  }
+
+  // ============= Handle Image Encryption =============
+  const onClickEncryptImage = async () => {
+    // const fileInBase64 = btoa(file)
+    const fileInBase64 = Buffer.from(file).toString('base64')
+
+    console.log('fileInBase64:', fileInBase64)
+
+    try {
+      const encryptedFile = await lit.encrypt(file)
+      console.log('🚀 ~ file: index.js ~ line 120 ~ onClickEncryptImage ~ encryptedFile', encryptedFile)
+
+      const encryptedFileInDataURI = await blobToDataURI(encryptedFile.encryptedContent)
+      console.log(
+        '🚀 ~ file: index.js ~ line 123 ~ onClickEncryptImage ~ encryptedFileInDataURI',
+        encryptedFileInDataURI
+      )
+
+      setEncryptedData(encryptedFileInDataURI)
+      setEncryptedSymmetricKey(encryptedFile.encryptedSymmetricKey)
+    } catch (error) {
+      console.log('onClickEncryptImage ~ error', error)
+    }
+  }
+
+  //
+  // ============= (Helper) Turn blob data to data URI =============
+
+  const blobToDataURI = (blob) => {
+    return new Promise((resolve, reject) => {
+      var reader = new FileReader()
+
+      reader.onload = (e) => {
+        var data = e.target.result
+        resolve(data)
+      }
+      reader.readAsDataURL(blob)
+    })
   }
 
   // ============= Handle Upload of Image To Arweave Via Bundlr =============
@@ -161,7 +204,7 @@ export default function Home() {
           <div>
             <h4>3. Encrypt Your Image</h4>
             <h5>Encrypt your image.</h5>
-            <button>Encypt Image</button>
+            <button onClick={() => onClickEncryptImage()}>Encrypt Image</button>
           </div>
 
           {/* ============= Step 4 ============= */}
