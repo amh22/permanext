@@ -5500,6 +5500,7 @@ __metadata:
     ethers: ^5.6.9
     lit-js-sdk: ^1.1.196
     next: 12.1.6
+    pretty-bytes: ^6.0.0
     react: 18.2.0
     react-dom: 18.2.0
     react-dropzone: ^14.2.2
@@ -5550,6 +5551,13 @@ __metadata:
   version: 1.2.1
   resolution: "prelude-ls@npm:1.2.1"
   checksum: cd192ec0d0a8e4c6da3bb80e4f62afe336df3f76271ac6deb0e6a36187133b6073a19e9727a1ff108cd8b9982e4768850d413baa71214dd80c7979617dca827a
+  languageName: node
+  linkType: hard
+
+"pretty-bytes@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "pretty-bytes@npm:6.0.0"
+  checksum: 0bb9f95e617236404b29a8392c6efd82d65805f622f5e809ecd70068102be857d4e3276c86d2a32fa2ef851cc29472e380945dab7bec83ec79bd57a19a10faf7
   languageName: node
   linkType: hard
 

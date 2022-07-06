@@ -1,17 +1,19 @@
 /** @jsxImportSource theme-ui */
-import { useContext, useState } from 'react'
+import { useContext, useState, useCallback } from 'react'
 import BigNumber from 'bignumber.js'
 import Image from 'next/image'
-import Dropzone from 'react-dropzone'
 import { MainContext } from '../context'
+import DropZone from '../components/DropZone'
+import prettyBytes from 'pretty-bytes'
 import ContainerPage from '../components/ContainerPage'
 
 export default function Home() {
   const [fundingAmount, setFundingAmount] = useState()
   const [file, setFile] = useState()
+  const [fileTypeError, setFileTypeError] = useState({ error: false, message: '' })
   const [fileSize, setFileSize] = useState(null)
   const [image, setImage] = useState()
-  const [URI, setURI] = useState() // ----> a link for user to view the upload on the Arweave network
+  const [URI, setURI] = useState() // <- a link for user to view the upload on the Arweave network
 
   const { initialiseBundlr, bundlrInstance, fetchBalance, balance } = useContext(MainContext)
 
@@ -38,23 +40,65 @@ export default function Home() {
     }
   }
 
+  // ============= Handle Image File Selection with DROPZONE =============
+  const onDropFile = useCallback(async (acceptedFiles) => {
+    const supportedFileTypes = ['image/jpeg', 'image/png'] // <- define the accepted file types
+
+    const file = acceptedFiles[0] // <- we only return a single file
+
+    // 👇 check submitted file type
+    if (!supportedFileTypes.includes(file.type)) {
+      setFileTypeError({
+        error: true,
+        message: `Incorrect file type! We only support ${supportedFileTypes.toString()} at the moment`,
+      })
+      return
+    }
+
+    if (file) {
+      setFileTypeError({
+        error: false,
+        message: '',
+      })
+      // 👇 give us a nice way to VIEW the IMAGE in our UI
+      const image = URL.createObjectURL(file)
+      console.log('🚀 ~ file: index.js ~ line 79~ image', image)
+      setImage(image) // <- now to save the FILE locally
+
+      const fileReader = new FileReader() // <- we use the FileReader API to read the image as a data URL
+
+      fileReader.onload = async (e) => {
+        const dataURL = e.target.result
+
+        console.log('DataURL:', dataURL)
+
+        setFile(dataURL)
+
+        setFileSize(prettyBytes(dataURL.length))
+      }
+
+      fileReader.readAsDataURL(file)
+    }
+  }, [])
+
   // ============= Handle Image File Selection =============
   function onFileChange(e) {
     console.log('🚀 ~ file: index.js ~ line 40 ~ onFileChange ~ e', e)
     const file = e.target.files[0]
-    // ----> make sure there is a file
+
     if (file) {
-      // ----> give us a nice way to VIEW the IMAGE in our UI
+      // 👇 give us a nice way to VIEW the IMAGE in our UI
       const image = URL.createObjectURL(file)
-      setImage(image)
-      // ----> now to save the FILE locally
-      // ----> this is the encoded file sent to Arweave
+      console.log('🚀 ~ file: index.js ~ line 79~ image', image)
+      setImage(image) // <- now to save the FILE locally
+
+      // 👇 this is the encoded file sent to Arweave
       let reader = new FileReader()
       reader.onload = function () {
         if (reader.result) {
-          setFile(Buffer.from(reader.result)) // ----> save the file locally
+          setFile(Buffer.from(reader.result)) // <- save the file locally
         }
-        console.log('line 55 - file:', file)
+        console.log('line 87 - file:', file)
       }
       reader.readAsArrayBuffer(file)
     }
@@ -96,20 +140,16 @@ export default function Home() {
           <div>
             <h4>2. Choose An Image</h4>
             <h5>Select the image you want to upload.</h5>
-            <input type='file' onChange={onFileChange} />
+            {/* <input type='file' onChange={onFileChange} /> */}
             {/* <button onClick={uploadFile}>Upload File</button> */}
+            <DropZone onDrop={onDropFile} />
           </div>
-          <Dropzone onDrop={(acceptedFiles) => console.log(acceptedFiles)}>
-            {({ getRootProps, getInputProps }) => (
-              <section>
-                <div {...getRootProps()}>
-                  <input {...getInputProps()} />
-                  <p>Drag and drop some files here, or click to select files</p>
-                </div>
-              </section>
-            )}
-          </Dropzone>
 
+          {fileTypeError.error && (
+            <div sx={{ pt: 4, border: '1px solid red' }}>
+              <p>{fileTypeError.message}</p>
+            </div>
+          )}
           {/* ---- show the selected image ---- */}
           {image && (
             <div sx={{ pt: 4, border: '1px solid red' }}>
