@@ -43,6 +43,15 @@ function App({ Component, pageProps }) {
     setBalance(utils.formatEther(bal.toString()))
   }
 
+  async function fetchCostToUploadFile(fileSize) {
+    console.log('🚀 ~ file: index.js ~ line 156 ~ costToUploadFile ~ fileSize', fileSize)
+    if (fileSize) {
+      const cost = await bundlrRef.current.getPrice(fileSize)
+      const costFormatted = utils.formatEther(cost.toString())
+      return costFormatted
+    }
+  }
+
   return (
     <MainContext.Provider
       value={{
@@ -50,6 +59,7 @@ function App({ Component, pageProps }) {
         bundlrInstance,
         fetchBalance,
         balance,
+        fetchCostToUploadFile,
       }}
     >
       <ThemeProvider theme={Theme}>

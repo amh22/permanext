@@ -13,12 +13,15 @@ export default function Home() {
   const [file, setFile] = useState()
   const [fileTypeError, setFileTypeError] = useState({ error: false, message: '' })
   const [fileSize, setFileSize] = useState(null)
+  const [fileCost, setFileCost] = useState(null)
   const [image, setImage] = useState()
+  const [accessConditions, setAccessConditions] = useState([])
   const [encryptedData, setEncryptedData] = useState(null)
   const [encryptedSymmetricKey, setEncryptedSymmetricKey] = useState(null)
   const [URI, setURI] = useState() // <- a link for user to view the upload on the Arweave network
 
-  const { initialiseBundlr, bundlrInstance, fetchBalance, balance } = useContext(MainContext)
+  const { initialiseBundlr, bundlrInstance, fetchBalance, balance, fetchCostToUploadFile } = useContext(MainContext)
+  console.log('🚀 ~ file: index.js ~ line 23 ~ Home ~ bundlrInstance', bundlrInstance)
 
   async function initialise() {
     initialiseBundlr()
@@ -48,6 +51,7 @@ export default function Home() {
     const supportedFileTypes = ['image/jpeg', 'image/png'] // <- define the accepted file types
 
     const file = acceptedFiles[0] // <- we only return a single file
+    console.log('🚀 ~ file: index.js ~ line 52 ~ onDropFile ~ file', file)
 
     // 👇 check submitted file type
     if (!supportedFileTypes.includes(file.type)) {
@@ -63,6 +67,7 @@ export default function Home() {
         error: false,
         message: '',
       })
+
       // 👇 give us a nice way to VIEW the IMAGE in our UI
       const image = URL.createObjectURL(file)
       console.log('🚀 ~ file: index.js ~ line 79~ image', image)
@@ -117,14 +122,13 @@ export default function Home() {
 
     try {
       const encryptedFile = await lit.encrypt(file)
-      console.log('🚀 ~ file: index.js ~ line 120 ~ onClickEncryptImage ~ encryptedFile', encryptedFile)
 
       const encryptedFileInDataURI = await blobToDataURI(encryptedFile.encryptedContent)
-      console.log(
-        '🚀 ~ file: index.js ~ line 123 ~ onClickEncryptImage ~ encryptedFileInDataURI',
-        encryptedFileInDataURI
-      )
 
+      const accessConditions = await encryptedFile.accessConditions
+      console.log('🚀 ~ file: index.js ~ line 129 ~ onClickEncryptImage ~ accessConditions', accessConditions)
+
+      setAccessConditions(accessConditions)
       setEncryptedData(encryptedFileInDataURI)
       setEncryptedSymmetricKey(encryptedFile.encryptedSymmetricKey)
     } catch (error) {
@@ -132,9 +136,7 @@ export default function Home() {
     }
   }
 
-  //
   // ============= (Helper) Turn blob data to data URI =============
-
   const blobToDataURI = (blob) => {
     return new Promise((resolve, reject) => {
       var reader = new FileReader()
@@ -147,12 +149,46 @@ export default function Home() {
     })
   }
 
-  // ============= Handle Upload of Image To Arweave Via Bundlr =============
+  // ============= LIT: Handle Upload of Image To Arweave Via Bundlr =============
+
+  const onClickSignAndUpload = async () => {
+    console.log('onClickSignAndUpload')
+
+    const getAccessConditions = accessConditions
+
+    const packagedData = {
+      encryptedData: encryptedData,
+      encryptedSymmetricKey,
+      accessControlConditions: getAccessConditions,
+    }
+
+    console.log('packagedData:', packagedData)
+
+    const packagedDataInString = JSON.stringify(packagedData)
+
+    console.log('packagedDataInString:', packagedDataInString)
+
+    // const txId = (await upload.json()).txId
+
+    // console.log('Uploaded! Transaction ID:', txId)
+
+    // setTxId(txId)
+  }
+
+  // ============= NADER: Handle Upload of Image To Arweave Via Bundlr =============
   async function uploadFile() {
     let tx = await bundlrInstance.uploader.upload(file, [{ name: 'Content-Type', value: 'image/png' }])
     console.log('🚀 ~ uploadFile ~ tx', tx)
     fetchBalance()
     setURI(`http://arweave.net/${tx.data.id}`)
+  }
+
+  // ============= Estimated Cost To Upload =============
+  async function costToUpload() {
+    if (!fileSize) return
+    console.log('🚀 ~ file: index.js ~ line 156 ~ costToUploadFile ~ fileSize', fileSize)
+    const cost = await bundlrInstance.getPrice(fileSize)
+    setFileCost(cost)
   }
 
   return (
@@ -209,9 +245,12 @@ export default function Home() {
 
           {/* ============= Step 4 ============= */}
           <div>
+            <h4>Only show Upload AFTER encryption</h4>
             <h4>4. Upload Your File</h4>
             <h5>Upload your file to the permaweb.</h5>
-            <button onClick={uploadFile}>Upload File</button>
+            <h5>FileSize: {fileSize}</h5>
+            <h5>Cost to upload your file: {fileSize}</h5>
+            <button onClick={onClickSignAndUpload}>Upload File</button>
           </div>
 
           {/* ---- display Arweave URI ---- */}

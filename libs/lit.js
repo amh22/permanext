@@ -2,8 +2,7 @@ import LitJsSdk from 'lit-js-sdk'
 
 // ============= Instantiating the Lit Client =============
 const client = new LitJsSdk.LitNodeClient()
-const chain = 'ethereum'
-const standardContractType = 'ERC721'
+const chain = 'polygon'
 
 const accessControlConditions = [
   {
@@ -51,6 +50,7 @@ class Lit {
     })
 
     return {
+      accessConditions: accessControlConditions,
       encryptedContent: encryptedString,
       encryptedSymmetricKey: LitJsSdk.uint8arrayToString(encryptedSymmetricKey, 'base16'),
     }
