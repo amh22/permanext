@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { MainContext } from '../context'
 import DropZone from '../components/DropZone'
 import prettyBytes from 'pretty-bytes'
+import { utils } from 'ethers'
 import ContainerPage from '../components/ContainerPage'
 import lit from '../libs/lit'
 
@@ -12,16 +13,17 @@ export default function Home() {
   const [fundingAmount, setFundingAmount] = useState()
   const [file, setFile] = useState()
   const [fileTypeError, setFileTypeError] = useState({ error: false, message: '' })
+  const [fileName, setFileName] = useState(null)
+  const [fileSizeInBytes, setFileSizeInBytes] = useState(null)
   const [fileSize, setFileSize] = useState(null)
   const [fileCost, setFileCost] = useState(null)
   const [image, setImage] = useState()
   const [accessConditions, setAccessConditions] = useState([])
   const [encryptedData, setEncryptedData] = useState(null)
   const [encryptedSymmetricKey, setEncryptedSymmetricKey] = useState(null)
-  const [URI, setURI] = useState() // <- a link for user to view the upload on the Arweave network
+  const [txId, setTxId] = useState()
 
-  const { initialiseBundlr, bundlrInstance, fetchBalance, balance, fetchCostToUploadFile } = useContext(MainContext)
-  console.log('🚀 ~ file: index.js ~ line 23 ~ Home ~ bundlrInstance', bundlrInstance)
+  const { initialiseBundlr, bundlrInstance, fetchBalance, balance } = useContext(MainContext)
 
   async function initialise() {
     initialiseBundlr()
@@ -70,7 +72,7 @@ export default function Home() {
 
       // 👇 give us a nice way to VIEW the IMAGE in our UI
       const image = URL.createObjectURL(file)
-      console.log('🚀 ~ file: index.js ~ line 79~ image', image)
+
       setImage(image) // <- now to save the FILE locally
 
       // 👇 we use the FileReader API to read the image as a data URL
@@ -79,10 +81,11 @@ export default function Home() {
       fileReader.onload = async (e) => {
         const dataURL = e.target.result
 
-        console.log('DataURL:', dataURL)
+        console.log('🚀 ~ file: index.js ~ line 80 ~ fileReader.onload= ~ dataURL', dataURL)
+        console.log('🚀 ~  index.js ~ line 80 ~ dataURL LENGTH', dataURL.length)
 
         setFile(dataURL)
-
+        setFileSizeInBytes(dataURL.length)
         setFileSize(prettyBytes(dataURL.length))
       }
 
@@ -128,6 +131,14 @@ export default function Home() {
       const accessConditions = await encryptedFile.accessConditions
       console.log('🚀 ~ file: index.js ~ line 129 ~ onClickEncryptImage ~ accessConditions', accessConditions)
 
+      console.log('🚀 ~ file: index.js ~ line 133 ~ onClickEncryptImage ~ fileSize', fileSize)
+      const cost = await bundlrInstance.getPrice(fileSizeInBytes)
+      console.log('🚀 ~ file: index.js ~ line 133 ~ onClickEncryptImage ~ cost', cost)
+
+      const formatCost = utils.formatEther(cost.toString())
+      console.log('🚀 ~ file: index.js ~ line 138 ~ onClickEncryptImage ~ formatCost', formatCost)
+      setFileCost(formatCost)
+
       setAccessConditions(accessConditions)
       setEncryptedData(encryptedFileInDataURI)
       setEncryptedSymmetricKey(encryptedFile.encryptedSymmetricKey)
@@ -136,7 +147,7 @@ export default function Home() {
     }
   }
 
-  // ============= (Helper) Turn blob data to data URI =============
+  // ============= (Helper) Turn blob data to data txId =============
   const blobToDataURI = (blob) => {
     return new Promise((resolve, reject) => {
       var reader = new FileReader()
@@ -167,29 +178,29 @@ export default function Home() {
     const packagedDataInString = JSON.stringify(packagedData)
 
     console.log('packagedDataInString:', packagedDataInString)
+    console.log('packagedDataInString LENGTH:', packagedDataInString.length)
 
-    // const txId = (await upload.json()).txId
+    const tags = [
+      // { name: 'Content-Type', value: 'image/png' },
+      { name: 'File', value: 'PermaNext' },
+      { name: 'Collection', value: 'permanext-collection-test' },
+    ]
 
-    // console.log('Uploaded! Transaction ID:', txId)
+    // Sign AND Upload
+    let tx = await bundlrInstance.uploader.upload(packagedDataInString, { tags })
+    console.log('🚀 ~ file: index.js ~ line 175 ~ onClickSignAndUpload ~ tx', tx)
 
-    // setTxId(txId)
+    fetchBalance()
+    setTxId(tx.data.id)
   }
 
   // ============= NADER: Handle Upload of Image To Arweave Via Bundlr =============
-  async function uploadFile() {
-    let tx = await bundlrInstance.uploader.upload(file, [{ name: 'Content-Type', value: 'image/png' }])
-    console.log('🚀 ~ uploadFile ~ tx', tx)
-    fetchBalance()
-    setURI(`http://arweave.net/${tx.data.id}`)
-  }
-
-  // ============= Estimated Cost To Upload =============
-  async function costToUpload() {
-    if (!fileSize) return
-    console.log('🚀 ~ file: index.js ~ line 156 ~ costToUploadFile ~ fileSize', fileSize)
-    const cost = await bundlrInstance.getPrice(fileSize)
-    setFileCost(cost)
-  }
+  // async function uploadFile() {
+  //   let tx = await bundlrInstance.uploader.upload(file, [{ name: 'Content-Type', value: 'image/png' }])
+  //   console.log('🚀 ~ uploadFile ~ tx', tx)
+  //   fetchBalance()
+  //   setTxId(`http://arweave.net/${tx.data.id}`)
+  // }
 
   return (
     <ContainerPage>
@@ -232,6 +243,7 @@ export default function Home() {
           {/* ---- show the selected image ---- */}
           {image && (
             <div sx={{ pt: 4, border: '1px solid red' }}>
+              {/* <p>Your file name: {fileName}</p> */}
               <Image alt='The uploaded image' src={image} width='240px' height='100%'></Image>
             </div>
           )}
@@ -248,15 +260,26 @@ export default function Home() {
             <h4>Only show Upload AFTER encryption</h4>
             <h4>4. Upload Your File</h4>
             <h5>Upload your file to the permaweb.</h5>
-            <h5>FileSize: {fileSize}</h5>
-            <h5>Cost to upload your file: {fileSize}</h5>
+            <h5>Encrypted File Size: {fileSize}</h5>
+            <h5>ESTIMATED Cost to upload encrypted file: {fileCost}</h5>
+            {fileCost && <h4>Cost to upload: {Math.round(fileCost * 1000) / 1000} MATIC</h4>}
             <button onClick={onClickSignAndUpload}>Upload File</button>
           </div>
 
-          {/* ---- display Arweave URI ---- */}
+          {/* ---- display Arweave txId ---- */}
           <div>
-            {URI && <h5>View the file stored on the Arweave network:</h5>}
-            {URI && <a href={URI}>{URI}</a>}
+            {txId && <h5>View the TRANSACTION on the Arweave network:</h5>}
+            {txId && (
+              <a
+                href={`http://arweave.app/tx/${txId}`}
+                target='_blank'
+                rel='noreferrer'
+              >{`http://arweave.app/tx/${txId}`}</a>
+            )}
+            {txId && <h5>Download the FILE:</h5>}
+            {txId && (
+              <a href={`http://arweave.net/${txId}`} target='_blank' rel='noreferrer'>{`http://arweave.net/${txId}`}</a>
+            )}
           </div>
         </>
       )}
