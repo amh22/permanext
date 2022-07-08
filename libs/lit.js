@@ -57,7 +57,7 @@ class Lit {
   }
 
   // ============= Decrypt The Content =============
-  async decrypt(encryptedContent, encryptedSymmetricKey) {
+  async decrypt(encryptedContent, accessConditions, encryptedSymmetricKey) {
     if (!this.litNodeClient) {
       await this.connect()
     }
@@ -68,7 +68,7 @@ class Lit {
 
     // ----> decrypt the encrypted symmetricKey
     const symmetricKey = await this.litNodeClient.getEncryptionKey({
-      accessControlConditions,
+      accessControlConditions: accessConditions,
       toDecrypt: encryptedSymmetricKey,
       chain,
       authSig,

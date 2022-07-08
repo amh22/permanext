@@ -10,18 +10,20 @@ import ContainerPage from '../components/ContainerPage'
 import lit from '../libs/lit'
 
 export default function Home() {
-  const [fundingAmount, setFundingAmount] = useState()
-  const [file, setFile] = useState()
+  const [fundingAmount, setFundingAmount] = useState(null)
+  const [file, setFile] = useState(null)
   const [fileTypeError, setFileTypeError] = useState({ error: false, message: '' })
   const [fileName, setFileName] = useState(null)
   const [fileSizeInBytes, setFileSizeInBytes] = useState(null)
   const [fileSize, setFileSize] = useState(null)
   const [fileCost, setFileCost] = useState(null)
-  const [image, setImage] = useState()
-  const [accessConditions, setAccessConditions] = useState([])
+  const [image, setImage] = useState(null)
+  const [accessConditions, setAccessConditions] = useState(null)
   const [encryptedData, setEncryptedData] = useState(null)
   const [encryptedSymmetricKey, setEncryptedSymmetricKey] = useState(null)
-  const [txId, setTxId] = useState()
+  const [txId, setTxId] = useState('g3U06X5C22t-PIVDIL0hdq0T_OKCcNMVVx2kDoDzLac')
+  const [downloadedEncryptedData, setDownloadedEncryptedData] = useState(null)
+  const [decryptedData, setDecryptedData] = useState(null)
 
   const { initialiseBundlr, bundlrInstance, fetchBalance, balance } = useContext(MainContext)
 
@@ -124,19 +126,15 @@ export default function Home() {
     console.log('fileInBase64:', fileInBase64)
 
     try {
-      const encryptedFile = await lit.encrypt(file)
+      const encryptedFile = await lit.encrypt(fileInBase64)
 
       const encryptedFileInDataURI = await blobToDataURI(encryptedFile.encryptedContent)
 
       const accessConditions = await encryptedFile.accessConditions
-      console.log('🚀 ~ file: index.js ~ line 129 ~ onClickEncryptImage ~ accessConditions', accessConditions)
 
-      console.log('🚀 ~ file: index.js ~ line 133 ~ onClickEncryptImage ~ fileSize', fileSize)
+      // 👇 get estimated cost to upload file to Arweave
       const cost = await bundlrInstance.getPrice(fileSizeInBytes)
-      console.log('🚀 ~ file: index.js ~ line 133 ~ onClickEncryptImage ~ cost', cost)
-
       const formatCost = utils.formatEther(cost.toString())
-      console.log('🚀 ~ file: index.js ~ line 138 ~ onClickEncryptImage ~ formatCost', formatCost)
       setFileCost(formatCost)
 
       setAccessConditions(accessConditions)
@@ -158,6 +156,24 @@ export default function Home() {
       }
       reader.readAsDataURL(blob)
     })
+  }
+
+  // ============= (Helper) Convert data URI to blob =============
+
+  const dataURItoBlob = (dataURI) => {
+    console.log(dataURI)
+
+    var byteString = window.atob(dataURI.split(',')[1])
+    var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]
+    var ab = new ArrayBuffer(byteString.length)
+    var ia = new Uint8Array(ab)
+    for (var i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i)
+    }
+
+    var blob = new Blob([ab], { type: mimeString })
+
+    return blob
   }
 
   // ============= LIT: Handle Upload of Image To Arweave Via Bundlr =============
@@ -194,13 +210,50 @@ export default function Home() {
     setTxId(tx.data.id)
   }
 
-  // ============= NADER: Handle Upload of Image To Arweave Via Bundlr =============
-  // async function uploadFile() {
-  //   let tx = await bundlrInstance.uploader.upload(file, [{ name: 'Content-Type', value: 'image/png' }])
-  //   console.log('🚀 ~ uploadFile ~ tx', tx)
-  //   fetchBalance()
-  //   setTxId(`http://arweave.net/${tx.data.id}`)
-  // }
+  // ============= Fetch Encrypted Data =============
+
+  const onFetchEncryptedData = async () => {
+    const downloadUrl = 'https://arweave.net/' + txId
+
+    const data = await fetch(downloadUrl)
+
+    const encryptedData = JSON.parse(await data.text())
+
+    console.log('encryptedData:', encryptedData)
+
+    setDownloadedEncryptedData(encryptedData)
+  }
+
+  // ============= Decrypt Downloaded Data =============
+
+  const onDecryptDownloadedData = async () => {
+    try {
+      // const decrypt = lit.decrypt(encryptedData, accessConditions, encryptedSymmetricKey)
+
+      const symmetricKey = await lit.decrypt.symmetricKey()
+    } catch (error) {
+      console.log('onDecryptDownloadedData ~ error', error)
+    }
+
+    const symmetricKey = await litNodeClient.getEncryptionKey({
+      accessControlConditions: downloadedEncryptedData.accessControlConditions,
+      // Note, below we convert the encryptedSymmetricKey from a UInt8Array to a hex string. This is because we obtained the encryptedSymmetricKey from "saveEncryptionKey" which returns a UInt8Array. But the getEncryptionKey method expects a hex string.
+      toDecrypt: LitJsSdk.uint8arrayToString(encryptedSymmetricKey, 'base16'),
+      chain: 'ethereum',
+      authSig,
+    })
+
+    const decryptedString = await LitJsSdk.decryptString(
+      dataURItoBlob(downloadedEncryptedData.encryptedData),
+      symmetricKey
+    )
+
+    const originalFormat = atob(decryptedString)
+
+    console.log('Original Format:', originalFormat)
+
+    setDecryptedData(originalFormat)
+  }
 
   return (
     <ContainerPage>
@@ -276,11 +329,30 @@ export default function Home() {
                 rel='noreferrer'
               >{`http://arweave.app/tx/${txId}`}</a>
             )}
-            {txId && <h5>Download the FILE:</h5>}
+            {txId && <h5>Download the Encrypted FILE:</h5>}
             {txId && (
               <a href={`http://arweave.net/${txId}`} target='_blank' rel='noreferrer'>{`http://arweave.net/${txId}`}</a>
             )}
           </div>
+
+          {/* ============= Step 5 ============= */}
+          <div>
+            <h4>5. Decrypt Your Image</h4>
+            <h5>a) Click to fetch the encrypted data from Arweave</h5>
+            <button onClick={() => onFetchEncryptedData()}>{`http://arweave.net/${txId}`}</button>
+            <div>
+              <code>{JSON.stringify(downloadedEncryptedData)}</code>
+            </div>
+          </div>
+          {decryptedData && (
+            <div>
+              <h5>b) Now decrypt the encrypted data</h5>
+              <button onClick={() => onDecryptDownloadedData()}>Decrypt</button>
+              <div>
+                <Image alt='The decrypted image' src={decryptedData} width='240px' height='100%'></Image>
+              </div>
+            </div>
+          )}
         </>
       )}
     </ContainerPage>
