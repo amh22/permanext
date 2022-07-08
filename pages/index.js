@@ -21,7 +21,7 @@ export default function Home() {
   const [accessConditions, setAccessConditions] = useState(null)
   const [encryptedData, setEncryptedData] = useState(null)
   const [encryptedSymmetricKey, setEncryptedSymmetricKey] = useState(null)
-  const [txId, setTxId] = useState('g3U06X5C22t-PIVDIL0hdq0T_OKCcNMVVx2kDoDzLac')
+  const [txId, setTxId] = useState(null)
   const [downloadedEncryptedData, setDownloadedEncryptedData] = useState(null)
   const [decryptedData, setDecryptedData] = useState(null)
 
@@ -97,7 +97,6 @@ export default function Home() {
 
   // ============= Handle Image File Selection =============
   function onFileChange(e) {
-    console.log('🚀 ~ file: index.js ~ line 40 ~ onFileChange ~ e', e)
     const file = e.target.files[0]
 
     if (file) {
@@ -189,12 +188,7 @@ export default function Home() {
       accessControlConditions: getAccessConditions,
     }
 
-    console.log('packagedData:', packagedData)
-
     const packagedDataInString = JSON.stringify(packagedData)
-
-    console.log('packagedDataInString:', packagedDataInString)
-    console.log('packagedDataInString LENGTH:', packagedDataInString.length)
 
     const tags = [
       // { name: 'Content-Type', value: 'image/png' },
@@ -227,32 +221,21 @@ export default function Home() {
   // ============= Decrypt Downloaded Data =============
 
   const onDecryptDownloadedData = async () => {
-    try {
-      // const decrypt = lit.decrypt(encryptedData, accessConditions, encryptedSymmetricKey)
+    console.log('onDecryptDownloadedData')
 
-      const symmetricKey = await lit.decrypt.symmetricKey()
+    const encryptedContent = dataURItoBlob(downloadedEncryptedData.encryptedData)
+
+    console.log('🚀 ~ file: index.js ~ line 226 ~ onDecryptDownloadedData ~ encryptedContent', encryptedContent)
+
+    try {
+      const decryptData = await lit.decrypt(encryptedContent, accessConditions, encryptedSymmetricKey)
+
+      const originalFormat = atob(decryptData.decryptedString)
+
+      setDecryptedData(originalFormat)
     } catch (error) {
       console.log('onDecryptDownloadedData ~ error', error)
     }
-
-    const symmetricKey = await litNodeClient.getEncryptionKey({
-      accessControlConditions: downloadedEncryptedData.accessControlConditions,
-      // Note, below we convert the encryptedSymmetricKey from a UInt8Array to a hex string. This is because we obtained the encryptedSymmetricKey from "saveEncryptionKey" which returns a UInt8Array. But the getEncryptionKey method expects a hex string.
-      toDecrypt: LitJsSdk.uint8arrayToString(encryptedSymmetricKey, 'base16'),
-      chain: 'ethereum',
-      authSig,
-    })
-
-    const decryptedString = await LitJsSdk.decryptString(
-      dataURItoBlob(downloadedEncryptedData.encryptedData),
-      symmetricKey
-    )
-
-    const originalFormat = atob(decryptedString)
-
-    console.log('Original Format:', originalFormat)
-
-    setDecryptedData(originalFormat)
   }
 
   return (
@@ -344,13 +327,15 @@ export default function Home() {
               <code>{JSON.stringify(downloadedEncryptedData)}</code>
             </div>
           </div>
-          {decryptedData && (
+          {encryptedData && (
             <div>
               <h5>b) Now decrypt the encrypted data</h5>
               <button onClick={() => onDecryptDownloadedData()}>Decrypt</button>
-              <div>
-                <Image alt='The decrypted image' src={decryptedData} width='240px' height='100%'></Image>
-              </div>
+            </div>
+          )}
+          {decryptedData && (
+            <div>
+              <Image alt='The decrypted image' src={decryptedData} width='240px' height='100%'></Image>
             </div>
           )}
         </>

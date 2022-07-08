@@ -13,7 +13,7 @@ const accessControlConditions = [
     parameters: [':userAddress', 'latest'],
     returnValueTest: {
       comparator: '>=',
-      value: '1000000000000', // 0.000001 ETH
+      value: '0000000000000', // 0.000001 ETH
     },
   },
 ]
@@ -69,6 +69,7 @@ class Lit {
     // ----> decrypt the encrypted symmetricKey
     const symmetricKey = await this.litNodeClient.getEncryptionKey({
       accessControlConditions: accessConditions,
+      // Note, below we convert the encryptedSymmetricKey from a UInt8Array to a hex string. This is because we obtained the encryptedSymmetricKey from "saveEncryptionKey" which returns a UInt8Array. But the getEncryptionKey method expects a hex string.
       toDecrypt: encryptedSymmetricKey,
       chain,
       authSig,
