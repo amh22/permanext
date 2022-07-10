@@ -191,17 +191,21 @@ export default function Home() {
     const packagedDataInString = JSON.stringify(packagedData)
 
     const tags = [
-      // { name: 'Content-Type', value: 'image/png' },
+      { name: 'Content-Type', value: 'application/octet-stream' },
       { name: 'File', value: 'PermaNext' },
       { name: 'Collection', value: 'permanext-collection-test' },
     ]
 
     // Sign AND Upload
-    let tx = await bundlrInstance.uploader.upload(packagedDataInString, { tags })
-    console.log('🚀 ~ file: index.js ~ line 175 ~ onClickSignAndUpload ~ tx', tx)
+    try {
+      let tx = await bundlrInstance.uploader.upload(packagedDataInString, tags)
+      console.log('🚀 ~ file: index.js ~ line 175 ~ onClickSignAndUpload ~ tx', tx)
 
-    fetchBalance()
-    setTxId(tx.data.id)
+      fetchBalance()
+      setTxId(tx.data.id)
+    } catch (error) {
+      console.log('There was an error uploading the image: ', error)
+    }
   }
 
   // ============= Fetch Encrypted Data =============
