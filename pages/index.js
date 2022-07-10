@@ -96,26 +96,26 @@ export default function Home() {
   }, [])
 
   // ============= Handle Image File Selection =============
-  function onFileChange(e) {
-    const file = e.target.files[0]
+  // function onFileChange(e) {
+  //   const file = e.target.files[0]
 
-    if (file) {
-      // 👇 give us a nice way to VIEW the IMAGE in our UI
-      const image = URL.createObjectURL(file)
-      console.log('🚀 ~ file: index.js ~ line 79~ image', image)
-      setImage(image) // <- now to save the FILE locally
+  //   if (file) {
+  //     // 👇 give us a nice way to VIEW the IMAGE in our UI
+  //     const image = URL.createObjectURL(file)
+  //     console.log('🚀 ~ file: index.js ~ line 79~ image', image)
+  //     setImage(image) // <- now to save the FILE locally
 
-      // 👇 this is the encoded file sent to Arweave
-      let reader = new FileReader()
-      reader.onload = function () {
-        if (reader.result) {
-          setFile(Buffer.from(reader.result)) // <- save the file locally
-        }
-        console.log('line 87 - file:', file)
-      }
-      reader.readAsArrayBuffer(file)
-    }
-  }
+  //     // 👇 this is the encoded file sent to Arweave
+  //     let reader = new FileReader()
+  //     reader.onload = function () {
+  //       if (reader.result) {
+  //         setFile(Buffer.from(reader.result)) // <- save the file locally
+  //       }
+  //       console.log('line 87 - file:', file)
+  //     }
+  //     reader.readAsArrayBuffer(file)
+  //   }
+  // }
 
   // ============= Handle Image Encryption =============
   const onClickEncryptImage = async () => {
@@ -240,7 +240,9 @@ export default function Home() {
 
   return (
     <ContainerPage>
-      <h3 sx={{ color: 'primary' }}>Landing Page: Gallery</h3>
+      <h3 sx={{ color: 'primary' }}>
+        Encypt with Lit and save to the Arweave network. Then, read back from the Arweave network and decrypt with Lit.
+      </h3>
       {!balance && <button onClick={initialise}>1. Connect Bundlr</button>}
       {balance && (
         <>
@@ -287,7 +289,7 @@ export default function Home() {
           {/* ============= Step 3 ============= */}
           <div>
             <h4>3. Encrypt Your Image</h4>
-            <h5>Encrypt your image.</h5>
+            <h5>grant decryption keys to users based on their blockchain credentials and asset ownership.</h5>
             <button onClick={() => onClickEncryptImage()}>Encrypt Image</button>
           </div>
 
@@ -311,6 +313,13 @@ export default function Home() {
                 target='_blank'
                 rel='noreferrer'
               >{`http://arweave.app/tx/${txId}`}</a>
+            )}
+            {txId && (
+              <h5>
+                The Encrypted FILE: As you will see, the data is obfuscated and safe. If someone was to try and view the
+                image, they will only get the access control conditions along with the encrypted and encoded zip and
+                symmetric key. All they can do is downlaod the encrypted file, but not view it until it is decrypted.
+              </h5>
             )}
             {txId && <h5>Download the Encrypted FILE:</h5>}
             {txId && (
