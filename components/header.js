@@ -13,7 +13,7 @@ export default function Header({ children }) {
               <a sx={styles.navLink}>Perma Pics</a>
             </Link>
             <Link href='/' passHref>
-              <a sx={styles.navLink}>Gallery</a>
+              <a sx={styles.navLink}>Upload</a>
             </Link>
             <Link href='/about' passHref>
               <a sx={styles.navLink}>About</a>
