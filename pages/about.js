@@ -1,6 +1,6 @@
 /** @jsxImportSource theme-ui */
 import Head from 'next/head'
-import ContainerPage from '../components/container-page'
+import ContainerPage from '../components/ContainerPage'
 
 export default function About() {
   return (

@@ -1,7 +1,7 @@
 /** @jsxImportSource theme-ui */
 import Link from 'next/link'
-import ColorModeSwitch from '../components/color-mode-switch'
-import ContainerHeader from './container-header'
+import ColorModeSwitch from './ColorModeSwitch'
+import ContainerHeader from './ContainerHeader'
 
 export default function Header({ children }) {
   return (
@@ -13,7 +13,7 @@ export default function Header({ children }) {
               <a sx={styles.navLink}>Perma Pics</a>
             </Link>
             <Link href='/' passHref>
-              <a sx={styles.navLink}>Gallery</a>
+              <a sx={styles.navLink}>Upload</a>
             </Link>
             <Link href='/about' passHref>
               <a sx={styles.navLink}>About</a>
