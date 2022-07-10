@@ -13,6 +13,8 @@ export default function Home() {
   const [fundingAmount, setFundingAmount] = useState(null)
   const [file, setFile] = useState(null)
   const [fileTypeError, setFileTypeError] = useState({ error: false, message: '' })
+  const [imageTitle, setImageTitle] = useState(null)
+  const [imageDescription, setImageDescription] = useState(null)
   const [fileName, setFileName] = useState(null)
   const [fileSizeInBytes, setFileSizeInBytes] = useState(null)
   const [fileSize, setFileSize] = useState(null)
@@ -192,8 +194,9 @@ export default function Home() {
 
     const tags = [
       { name: 'Content-Type', value: 'application/octet-stream' },
-      { name: 'File', value: 'PermaNext' },
-      { name: 'Collection', value: 'permanext-collection-test' },
+      { name: 'App-Name', value: 'PermaPic' },
+      { name: 'Title', value: imageTitle },
+      { name: 'Description', value: imageDescription },
     ]
 
     // Sign AND Upload
@@ -294,13 +297,30 @@ export default function Home() {
           <div>
             <h4>3. Encrypt Your Image</h4>
             <h5>grant decryption keys to users based on their blockchain credentials and asset ownership.</h5>
+            {/* ---- fund your bundlr wallet ---- */}
+            <div style={{ padding: '10px 0 10px 0' }}>
+              <input
+                type='text'
+                placeholder='Image Title'
+                onChange={(e) => setImageTitle(e.target.value)}
+                sx={{ width: '200px' }}
+              />
+            </div>
+            <div style={{ padding: '10px 0 30px 0' }}>
+              <textarea
+                type='text'
+                placeholder='Description'
+                onChange={(e) => setImageDescription(e.target.value)}
+                sx={{ width: '200px' }}
+              />
+            </div>
             <button onClick={() => onClickEncryptImage()}>Encrypt Image</button>
           </div>
 
           {/* ============= Step 4 ============= */}
           <div>
-            <h4>Only show Upload AFTER encryption</h4>
             <h4>4. Upload Your File</h4>
+            <h4 sx={{ color: 'red' }}>Should only show Upload AFTER encryption</h4>
             <h5>Upload your file to the permaweb.</h5>
             <h5>Encrypted File Size: {fileSize}</h5>
             <h5>ESTIMATED Cost to upload encrypted file: {fileCost}</h5>
