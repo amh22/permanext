@@ -84,6 +84,7 @@ export default function Decrypt() {
 
   const onDecryptDownloadedData = async () => {
     console.log('onDecryptDownloadedData')
+    setDataDecrypted(null)
     setDecryptingData(true)
     const encryptedContent = dataURItoBlob(downloadedEncryptedData.encryptedData)
 
