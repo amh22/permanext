@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import lit from '../libs/lit'
 import ContainerPage from '../components/ContainerPage'
+import Modal from '../components/Modal'
 
 export default function Decrypt() {
   const [txId, setTxId] = useState(null)
@@ -112,6 +113,7 @@ export default function Decrypt() {
       </Head>
 
       <ContainerPage>
+        <Modal />
         <ConnectButton />
         <h3 sx={{ color: 'primary' }}>Decrypt A File</h3>
         <h4 sx={{ color: 'primary' }}>
