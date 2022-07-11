@@ -22,7 +22,7 @@ export default function Decrypt() {
   const onFetchEncryptedData = async () => {
     console.log('onFetchEncryptedData')
 
-    setDataFetched(false) // <- clear on a new fetch
+    setDataFetched(null) // <- clear on a new fetch
     setFetchingData(true) // <- set to display loading state
     setDownloadedEncryptedData(null)
     setAccessControlConditions(null)
@@ -125,7 +125,15 @@ export default function Decrypt() {
             To decrypt the file, we need to fetch the encrypted data file from the Arweave network. Please input the
             Arweave transaction ID in the input field below:
           </h5>
-          <input type='text' placeholder='Transaction ID' onChange={(e) => setTxId(e.target.value)} />
+          <input
+            type='text'
+            placeholder='Transaction ID'
+            onChange={(e) => {
+              setTxId(e.target.value)
+              setDecryptedData(null)
+              setDataFetched(null)
+            }}
+          />
           <h5>You can verify you have the correct transaction and file by reviewing the links below:</h5>
           <div>
             {txId && <h5>TRANSACTION on the Arweave network:</h5>}
