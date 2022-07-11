@@ -48,9 +48,12 @@ const styles = {
     fontSize: [5, 5, 5, 5],
   },
   li: {
+    listStyle: 'none',
+    display: 'flex',
     color: 'text',
     variant: 'text.paragraph',
     fontSize: [4, 4, 4, 4],
+    px: [2, 2, 4, 4],
   },
   a: {
     fontSize: [5, 5, 5, 5],

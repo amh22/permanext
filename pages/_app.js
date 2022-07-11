@@ -5,7 +5,7 @@ import { providers, utils } from 'ethers'
 // import lit from '../utils/lit'
 import Theme from '../theme'
 import { MainContext } from '../context'
-import Layout from '../components/layout'
+import Layout from '../components/Layout'
 import '../styles.css'
 
 function App({ Component, pageProps }) {
