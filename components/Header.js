@@ -46,6 +46,11 @@ export default function Header({ children }) {
                 </Link>
               </Themed.li>
               <Themed.li>
+                <Link href='/decrypt' passHref>
+                  <a sx={styles.navLink}>Decrypt</a>
+                </Link>
+              </Themed.li>
+              <Themed.li>
                 <Link href='/about' passHref>
                   <a sx={styles.navLink}>About</a>
                 </Link>
