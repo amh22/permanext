@@ -10,6 +10,8 @@ export default function Decrypt() {
   const [fetchingData, setFetchingData] = useState(false)
   const [dataFetched, setDataFetched] = useState(null)
   const [downloadedEncryptedData, setDownloadedEncryptedData] = useState(null)
+  const [accessControlConditions, setAccessControlConditions] = useState(null)
+  const [encryptedSymmetricKey, setEncryptedSymmetricKey] = useState(null)
   const [decryptedData, setDecryptedData] = useState(null)
 
   // ============= Fetch Encrypted Data =============
@@ -29,9 +31,22 @@ export default function Decrypt() {
 
       console.log('encryptedData:', encryptedData)
 
+      const dataAccessConditions = encryptedData.accessControlConditions
+
+      console.log('🚀 ~ file: decrypt.js ~ line 35 ~ onFetchEncryptedData ~ dataAccessConditions', dataAccessConditions)
+
+      const dataEncryptedSymmetricKey = encryptedData.encryptedSymmetricKey
+
+      console.log(
+        '🚀 ~ file: decrypt.js ~ line 39 ~ onFetchEncryptedData ~ dataEncryptedSymmetricKey',
+        dataEncryptedSymmetricKey
+      )
+
       setFetchingData(false)
       setDataFetched(true)
       setDownloadedEncryptedData(encryptedData)
+      setAccessControlConditions(dataAccessConditions)
+      setEncryptedSymmetricKey(dataEncryptedSymmetricKey)
     } catch (error) {
       setFetchingData(false)
       console.log('onFetchEncryptedData ~ error', error)
@@ -67,7 +82,7 @@ export default function Decrypt() {
     console.log('🚀 ~ file: index.js ~ line 226 ~ onDecryptDownloadedData ~ encryptedContent', encryptedContent)
 
     try {
-      const decryptData = await lit.decrypt(encryptedContent, accessConditions, encryptedSymmetricKey)
+      const decryptData = await lit.decrypt(encryptedContent, accessControlConditions, encryptedSymmetricKey)
 
       const originalFormat = atob(decryptData.decryptedString)
 
