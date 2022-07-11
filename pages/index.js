@@ -1,5 +1,6 @@
 /** @jsxImportSource theme-ui */
 import { useContext, useState, useCallback } from 'react'
+import { ConnectButton } from '@rainbow-me/rainbowkit'
 import BigNumber from 'bignumber.js'
 import Image from 'next/image'
 import { MainContext } from '../context'
@@ -247,6 +248,7 @@ export default function Home() {
 
   return (
     <ContainerPage>
+      <ConnectButton />
       <h3 sx={{ color: 'primary' }}>
         Encypt with Lit and save to the Arweave network. Then, read back from the Arweave network and decrypt with Lit.
       </h3>

@@ -6,17 +6,31 @@ const chain = 'polygon'
 
 const accessControlConditions = [
   {
-    contractAddress: '',
-    standardContractType: '',
+    contractAddress: '0x57f1887a8BF19b14fC0dF6Fd9B2acc9Af147eA85',
     chain: 'ethereum',
-    method: 'eth_getBalance',
+    standardContractType: 'ERC721',
+    method: 'balanceOf',
     parameters: [':userAddress', 'latest'],
     returnValueTest: {
-      comparator: '>=',
-      value: '0000000000000', // 0.000001 ETH
+      comparator: '>',
+      value: '0',
     },
   },
 ]
+
+// const accessControlConditions = [
+//   {
+//     contractAddress: '',
+//     chain: 'ethereum',
+//     standardContractType: '',
+//     method: 'eth_getBalance',
+//     parameters: [':userAddress', 'latest'],
+//     returnValueTest: {
+//       comparator: '>=',
+//       value: '0000000000000', // 0.000001 ETH
+//     },
+//   },
+// ]
 
 // ============= Create a Lit class and set the litNodeClient =============
 class Lit {
@@ -36,6 +50,8 @@ class Lit {
 
     // ----> first obtain an authorisation signature
     // ----> i.e. get the user to sign a message with their wallet provider
+    // ----> if wallet already connected they will be asked to sign with that wallet
+    // ----> otherwise they will be prompted to connect a wallet
     const authSig = await LitJsSdk.checkAndSignAuthMessage({ chain })
 
     // ----> encrypt the content and get the symmetricKey
@@ -67,17 +83,22 @@ class Lit {
     const authSig = await LitJsSdk.checkAndSignAuthMessage({ chain })
 
     // ----> decrypt the encrypted symmetricKey
-    const symmetricKey = await this.litNodeClient.getEncryptionKey({
-      accessControlConditions: accessConditions,
-      toDecrypt: encryptedSymmetricKey,
-      chain,
-      authSig,
-    })
+    try {
+      const symmetricKey = await this.litNodeClient.getEncryptionKey({
+        accessControlConditions: accessConditions,
+        toDecrypt: encryptedSymmetricKey,
+        chain,
+        authSig,
+      })
 
-    // ----> decrypt the content
-    const decryptedString = await LitJsSdk.decryptString(encryptedContent, symmetricKey)
+      // ----> decrypt the content
+      const decryptedString = await LitJsSdk.decryptString(encryptedContent, symmetricKey)
 
-    return { decryptedString }
+      return { decryptedString }
+    } catch (error) {
+      console.log('Decryption error: ', error)
+      return error
+    }
   }
 }
 export default new Lit()
