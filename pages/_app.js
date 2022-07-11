@@ -1,12 +1,32 @@
 import { useState, useRef } from 'react'
 import { ThemeProvider } from 'theme-ui'
+import '@rainbow-me/rainbowkit/styles.css'
+import { getDefaultWallets, RainbowKitProvider, darkTheme, midnightTheme } from '@rainbow-me/rainbowkit'
+import { chain, configureChains, createClient, WagmiConfig } from 'wagmi'
+import { alchemyProvider } from 'wagmi/providers/alchemy'
+import { publicProvider } from 'wagmi/providers/public'
 import { WebBundlr } from '@bundlr-network/client'
 import { providers, utils } from 'ethers'
-// import lit from '../utils/lit'
 import Theme from '../theme'
 import { MainContext } from '../context'
 import Layout from '../components/Layout'
 import '../styles.css'
+
+const { chains, provider } = configureChains(
+  [chain.mainnet, chain.polygon, chain.optimism, chain.arbitrum],
+  [alchemyProvider({ alchemyId: process.env.ALCHEMY_ID }), publicProvider()]
+)
+
+const { connectors } = getDefaultWallets({
+  appName: 'My RainbowKit App',
+  chains,
+})
+
+const wagmiClient = createClient({
+  autoConnect: true,
+  connectors,
+  provider,
+})
 
 function App({ Component, pageProps }) {
   const [bundlrInstance, setBundlrInstance] = useState()
@@ -21,6 +41,7 @@ function App({ Component, pageProps }) {
     await window.ethereum.enable()
 
     const provider = new providers.Web3Provider(window.ethereum)
+    console.log('🚀 ~ file: _app.js ~ line 24 ~ initialiseBundlr ~ provider', provider)
     await provider._ready()
 
     const bundlr = new WebBundlr('https://node1.bundlr.network', currency, provider)
@@ -54,7 +75,11 @@ function App({ Component, pageProps }) {
     >
       <ThemeProvider theme={Theme}>
         <Layout>
-          <Component {...pageProps} />
+          <WagmiConfig client={wagmiClient}>
+            <RainbowKitProvider chains={chains} theme={midnightTheme()}>
+              <Component {...pageProps} />
+            </RainbowKitProvider>
+          </WagmiConfig>
         </Layout>
       </ThemeProvider>
     </MainContext.Provider>

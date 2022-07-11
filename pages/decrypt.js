@@ -167,6 +167,7 @@ export default function Decrypt() {
           <div>
             <h4>3. Decrypt the file & view the file</h4>
             <h5>Click below to decrypt the file and view the image.</h5>
+            <h5>Make sure you select the correct wallet that meets the access control conditions.</h5>
             <button onClick={() => onDecryptDownloadedData()}>Decrypt</button>
           </div>
         )}
@@ -180,7 +181,7 @@ export default function Decrypt() {
           <div>
             <p>
               Error decrypting the file data. You may not meet the access control conditions, or the file was encrypted
-              and uploaded by another app. Please check with the owner of the file.
+              and uploaded by another app. Please check the wallet you are signing with or with the owner of the file.
             </p>
           </div>
         )}
