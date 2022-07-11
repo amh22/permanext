@@ -13,12 +13,12 @@ import Layout from '../components/Layout'
 import '../styles.css'
 
 const { chains, provider } = configureChains(
-  [chain.mainnet, chain.polygon, chain.optimism, chain.arbitrum],
+  [chain.polygon],
   [alchemyProvider({ alchemyId: process.env.ALCHEMY_ID }), publicProvider()]
 )
 
 const { connectors } = getDefaultWallets({
-  appName: 'My RainbowKit App',
+  appName: 'PermaPic',
   chains,
 })
 
@@ -76,7 +76,7 @@ function App({ Component, pageProps }) {
       <ThemeProvider theme={Theme}>
         <Layout>
           <WagmiConfig client={wagmiClient}>
-            <RainbowKitProvider chains={chains} theme={midnightTheme()}>
+            <RainbowKitProvider chains={chains}>
               <Component {...pageProps} />
             </RainbowKitProvider>
           </WagmiConfig>
