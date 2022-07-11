@@ -12,6 +12,8 @@ export default function Decrypt() {
   const [downloadedEncryptedData, setDownloadedEncryptedData] = useState(null)
   const [accessControlConditions, setAccessControlConditions] = useState(null)
   const [encryptedSymmetricKey, setEncryptedSymmetricKey] = useState(null)
+  const [decryptingData, setDecryptingData] = useState(null)
+  const [dataDecrypted, setDataDecrypted] = useState(null)
   const [decryptedData, setDecryptedData] = useState(null)
 
   // ============= Fetch Encrypted Data =============
@@ -21,6 +23,11 @@ export default function Decrypt() {
 
     setDataFetched(false) // <- clear on a new fetch
     setFetchingData(true) // <- set to display loading state
+    setDownloadedEncryptedData(null)
+    setAccessControlConditions(null)
+    setEncryptedSymmetricKey(null)
+    setDataDecrypted(null)
+    setDecryptedData(null)
 
     const downloadUrl = 'https://arweave.net/' + txId
 
@@ -76,7 +83,7 @@ export default function Decrypt() {
 
   const onDecryptDownloadedData = async () => {
     console.log('onDecryptDownloadedData')
-
+    setDecryptingData(true)
     const encryptedContent = dataURItoBlob(downloadedEncryptedData.encryptedData)
 
     console.log('🚀 ~ file: index.js ~ line 226 ~ onDecryptDownloadedData ~ encryptedContent', encryptedContent)
@@ -85,10 +92,13 @@ export default function Decrypt() {
       const decryptData = await lit.decrypt(encryptedContent, accessControlConditions, encryptedSymmetricKey)
 
       const originalFormat = atob(decryptData.decryptedString)
-
+      setDecryptingData(false)
+      setDataDecrypted(true)
       setDecryptedData(originalFormat)
     } catch (error) {
+      setDecryptingData(false)
       console.log('onDecryptDownloadedData ~ error', error)
+      setDataDecrypted('encryptionError')
     }
   }
 
@@ -101,7 +111,11 @@ export default function Decrypt() {
 
       <ContainerPage>
         <h3 sx={{ color: 'primary' }}>Decrypt A File</h3>
-        <h4 sx={{ color: 'primary' }}>You can decrypt a Lit encrypted file on Arweave here.</h4>
+        <h4 sx={{ color: 'primary' }}>
+          Lit encrypted files on the permaweb created by this PermaPic app can be decrypted here, providing you meet the
+          on-chain access control conditions specified by the owner of the file.
+        </h4>
+
         {/* ============= Step 1 ============= */}
         <div>
           <h4>1. Arweave Transaction ID</h4>
@@ -151,14 +165,23 @@ export default function Decrypt() {
         {/* ============= Step 3 ============= */}
         {downloadedEncryptedData && (
           <div>
-            <h4>3. Now decrypt the encrypted data</h4>
+            <h4>3. Decrypt the file & view the file</h4>
             <h5>Click below to decrypt the file and view the image.</h5>
             <button onClick={() => onDecryptDownloadedData()}>Decrypt</button>
           </div>
         )}
-        {decryptedData && (
+        {decryptingData && <p>decrypting the file...</p>}
+        {!decryptingData && decryptedData && (
           <div>
             <Image alt='The decrypted image' src={decryptedData} width='240px' height='100%'></Image>
+          </div>
+        )}
+        {dataDecrypted === 'encryptionError' && (
+          <div>
+            <p>
+              Error decrypting the file data. You may not meet the access control conditions, or the file was encrypted
+              and uploaded by another app. Please check with the owner of the file.
+            </p>
           </div>
         )}
       </ContainerPage>
