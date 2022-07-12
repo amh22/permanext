@@ -15,6 +15,7 @@ export default function Decrypt() {
   const [accessControlConditions, setAccessControlConditions] = useState(null)
   const [encryptedSymmetricKey, setEncryptedSymmetricKey] = useState(null)
   const [decryptingData, setDecryptingData] = useState(null)
+  const [decryptError, setDecryptError] = useState(null)
   const [dataDecrypted, setDataDecrypted] = useState(null)
   const [decryptedData, setDecryptedData] = useState(null)
 
@@ -101,6 +102,7 @@ export default function Decrypt() {
     } catch (error) {
       setDecryptingData(false)
       console.log('onDecryptDownloadedData ~ error', error)
+      setDecryptError(`${error.message}. Please try again or contact the file owner.`)
       setDataDecrypted('encryptionError')
     }
   }
@@ -196,6 +198,7 @@ export default function Decrypt() {
               Error decrypting the file data. You may not meet the access control conditions, or the file was encrypted
               and uploaded by another app. Please check the wallet you are signing with or with the owner of the file.
             </p>
+            <p>{decryptError}</p>
           </div>
         )}
       </ContainerPage>
