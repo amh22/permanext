@@ -17,8 +17,10 @@ const { chains, provider } = configureChains(
   [alchemyProvider({ alchemyId: process.env.ALCHEMY_ID }), publicProvider()]
 )
 
+const APP_NAME = process.env.ARWEAVE_APP_NAME || 'YOUR_APP_NAME'
+
 const { connectors } = getDefaultWallets({
-  appName: 'PermaPic',
+  appName: APP_NAME,
   chains,
 })
 

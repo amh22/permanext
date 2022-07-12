@@ -10,6 +10,7 @@ import prettyBytes from 'pretty-bytes'
 import { utils } from 'ethers'
 import ContainerPage from '../components/ContainerPage'
 import lit from '../libs/lit'
+import { APP_NAME } from '../utils'
 
 export default function Home() {
   const [fundingAmount, setFundingAmount] = useState(null)
@@ -196,10 +197,11 @@ export default function Home() {
 
     const tags = [
       { name: 'Content-Type', value: 'application/octet-stream' },
-      { name: 'App-Name', value: 'PermaPic' },
+      { name: 'App-Name', value: APP_NAME },
       { name: 'Title', value: imageTitle },
       { name: 'Description', value: imageDescription },
     ]
+    console.log('🚀 ~ file: index.js ~ line 205 ~ onClickSignAndUpload ~ tags', tags)
 
     // Sign AND Upload
     try {
