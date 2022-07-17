@@ -19,9 +19,8 @@ export const createFileInfo = (node) => {
     timestamp: timestamp,
     request: null,
   }
-  // console.log('🚀 ~ file: utils.js ~ line 21 ~ createFileInfo ~ fileInfo', fileInfo)
 
-  // 👇 adding a request property to the fileInfo instance we're initialising, and then assigned the promise returned by arweave.api.get()
+  // 👇 adding a request property to the fileInfo instance we're initialising, and then assigned the 'promise' returned by arweave.api.get(). This will give us the transaction 'data' we'll need to display the images in our frontend
 
   if (fileInfo.length > 0) {
     fileInfo.request = arweave.api.get(`/${node.id}`, { timeout: 10000 }).catch(() => {

@@ -5,7 +5,7 @@ import { arweave, buildQuery, createFileInfo, APP_NAME } from '../utils'
 import ContainerPage from '../components/ContainerPage'
 import { Files } from '../components/Files'
 
-// 👇 Here we use the arweave-js package to POST a GraphQL request to the default gateway’s graphql endpoint (https://arweave.net/graphql) and await the response. Note: we are getting the transaction 'info' NOT the transaction 'data'
+// 👇 Here we use the arweave-js package to POST a GraphQL request to the default gateway’s graphql endpoint (https://arweave.net/graphql) and await the response.
 async function getFileInfo() {
   console.log('running getFileInfo')
   const query = buildQuery()
