@@ -5,7 +5,9 @@ export const arweave = Arweave.init({})
 
 export const APP_NAME = process.env.NEXT_PUBLIC_ARWEAVE_APP_NAME || 'YOUR_APP_NAME'
 
-export const createFileInfo = async (node) => {
+// convert the node objects to nice objects to work with
+export const createFileInfo = (node) => {
+  // console.log('running createFileInfo')
   const ownerAddress = node.owner.address
   const height = node.block ? node.block.height : -1
   const timestamp = node.block ? parseInt(node.block.timestamp, 10) * 1000 : -1
@@ -15,9 +17,20 @@ export const createFileInfo = async (node) => {
     height: height,
     length: node.data.size,
     timestamp: timestamp,
+    request: null,
+  }
+  // console.log('🚀 ~ file: utils.js ~ line 21 ~ createFileInfo ~ fileInfo', fileInfo)
+
+  // 👇 adding a request property to the fileInfo instance we're initialising, and then assigned the promise returned by arweave.api.get()
+
+  if (fileInfo.length > 0) {
+    fileInfo.request = arweave.api.get(`/${node.id}`, { timeout: 10000 }).catch(() => {
+      fileInfo.error = 'Timeout loading data'
+    })
+  } else {
+    fileInfo.error = 'Error, there is no image file'
   }
 
-  fileInfo.request = await arweave.api.get(`/${node.id}`, { timeout: 10000 })
   return fileInfo
 }
 
