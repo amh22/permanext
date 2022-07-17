@@ -27,7 +27,12 @@ const FileItem = (props) => {
 
   const [statusMessage, setStatusMessage] = useState('')
 
-  const { txid, date, tags, dateString } = props.fileInfo
+  const { txid, date, tags } = props.fileInfo
+  const fileDetails = {
+    txid,
+    date,
+    tags,
+  }
 
   useEffect(() => {
     let newFileData = ''
@@ -73,6 +78,16 @@ const FileItem = (props) => {
 
   return (
     <div sx={{ my: 3, p: 3, border: '1px solid red' }}>
+      <FileDetails info={fileDetails} />
+      <EncryptedData txid={txid} />
+      <ImageData />
+    </div>
+  )
+}
+
+const FileDetails = ({ info: { txid, tags, date } }) => {
+  return (
+    <div sx={{ my: 3, border: '1px solid black' }}>
       <p>Uploaded {date}</p>
       <div>
         {tags.map((tag) => (
@@ -86,11 +101,21 @@ const FileItem = (props) => {
         <h5>TRANSACTION on the Arweave network:</h5>
 
         <a href={`http://arweave.app/tx/${txid}`} target='_blank' rel='noreferrer'>{`http://arweave.app/tx/${txid}`}</a>
-
-        <h5>The Encrypted FILE:</h5>
-
-        <a href={`http://arweave.net/${txid}`} target='_blank' rel='noreferrer'>{`http://arweave.net/${txid}`}</a>
       </div>
     </div>
   )
 }
+
+const EncryptedData = ({ txid }) => (
+  <div sx={{ my: 3, border: '1px solid blue' }}>
+    <h5>The Encrypted FILE:</h5>
+
+    <a href={`http://arweave.net/${txid}`} target='_blank' rel='noreferrer'>{`http://arweave.net/${txid}`}</a>
+  </div>
+)
+
+const ImageData = ({ txid }) => (
+  <div sx={{ my: 3, border: '1px solid pink' }}>
+    <h5>The IMAGE FILE:</h5>
+  </div>
+)
