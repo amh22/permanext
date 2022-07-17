@@ -1,3 +1,4 @@
+/** @jsxImportSource theme-ui */
 import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 
@@ -71,9 +72,8 @@ const FileItem = (props) => {
   }, [props.fileInfo])
 
   return (
-    <>
+    <div sx={{ my: 3, p: 3, border: '1px solid red' }}>
       <p>Uploaded {date}</p>
-
       <div>
         {tags.map((tag) => (
           <div key={txid}>
@@ -91,6 +91,6 @@ const FileItem = (props) => {
 
         <a href={`http://arweave.net/${txid}`} target='_blank' rel='noreferrer'>{`http://arweave.net/${txid}`}</a>
       </div>
-    </>
+    </div>
   )
 }
