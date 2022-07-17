@@ -42,9 +42,8 @@ export default function Profile() {
       <ContainerPage>
         <h3 sx={{ color: 'primary' }}>Profile Page</h3>
         <h3 sx={{ color: 'primary' }}>App Name: {APP_NAME}</h3>
-        <button onClick={() => getFileInfo()}>Query</button>
-        {isSearching && <p>searching for files...</p>}
-        <Files isSearching={isSearching} data={fileInfo} />
+        {isSearching && <h3 sx={{ color: 'blue' }}>Searching for files...</h3>}
+        <Files data={fileInfo} />
       </ContainerPage>
     </div>
   )

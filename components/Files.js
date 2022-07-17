@@ -3,11 +3,11 @@ import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 import { FileItem } from './FileItem'
 
-export const Files = ({ isSearching, data }) => {
+export const Files = ({ data }) => {
   return (
     <div>
       {data.map((data) => {
-        const { txid, timestamp, tags } = data
+        const { txid, timestamp, tags, request } = data
         const date = new Date(timestamp)
         const formattedDate = format(date, 'LLLL d, yyyy')
 
@@ -15,6 +15,7 @@ export const Files = ({ isSearching, data }) => {
           txid,
           date: formattedDate,
           tags,
+          request,
         }
         return <FileItem key={txid} fileInfo={info} />
       })}

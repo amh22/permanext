@@ -38,19 +38,11 @@ export default function Decrypt() {
       const data = await fetch(downloadUrl)
 
       const encryptedData = JSON.parse(await data.text())
-
-      console.log('encryptedData:', encryptedData)
+      console.log('🚀 ~ file: decrypt.js ~ line 41 ~ onFetchEncryptedData ~ encryptedData', encryptedData)
 
       const dataAccessConditions = encryptedData.accessControlConditions
 
-      console.log('🚀 ~ file: decrypt.js ~ line 35 ~ onFetchEncryptedData ~ dataAccessConditions', dataAccessConditions)
-
       const dataEncryptedSymmetricKey = encryptedData.encryptedSymmetricKey
-
-      console.log(
-        '🚀 ~ file: decrypt.js ~ line 39 ~ onFetchEncryptedData ~ dataEncryptedSymmetricKey',
-        dataEncryptedSymmetricKey
-      )
 
       setFetchingData(false)
       setDataFetched(true)
@@ -86,11 +78,11 @@ export default function Decrypt() {
 
   const onDecryptDownloadedData = async () => {
     console.log('onDecryptDownloadedData')
+    console.log('line 89:', onDecryptDownloadedData)
+    console.log('line 90:', downloadedEncryptedData.encryptedData)
     setDataDecrypted(null)
     setDecryptingData(true)
     const encryptedContent = dataURItoBlob(downloadedEncryptedData.encryptedData)
-
-    console.log('🚀 ~ file: index.js ~ line 226 ~ onDecryptDownloadedData ~ encryptedContent', encryptedContent)
 
     try {
       const decryptData = await lit.decrypt(encryptedContent, accessControlConditions, encryptedSymmetricKey)
