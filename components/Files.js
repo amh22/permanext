@@ -1,41 +1,50 @@
 import { useState, useEffect } from 'react'
+import { format } from 'date-fns'
 
 export const Files = ({ isSearching, data }) => {
-  console.log('🚀 ~ file: Files.js ~ line 2 ~ Files ~ data', data)
-
   return (
     <div>
-      {data.map((data) => (
-        <FileItem key={data.txid} fileInfo={data} />
-      ))}
+      {data.map((data) => {
+        const { txid, timestamp, tags } = data
+        const date = new Date(timestamp)
+        const formattedDate = format(date, 'LLLL d, yyyy')
+
+        const info = {
+          txid,
+          date: formattedDate,
+          tags,
+        }
+        return <FileItem key={txid} fileInfo={info} />
+      })}
     </div>
   )
 }
 
 const FileItem = (props) => {
-  const [imageFile, setImageFile] = useState('')
+  const [fileData, setFileData] = useState('')
+  // console.log('🚀 ~ file: Files.js ~ line 26 ~ FileItem ~ fileData', fileData)
+
   const [statusMessage, setStatusMessage] = useState('')
 
-  console.log('🚀 ~ file: Files.js ~ line 18 ~ FileItem ~ fileInfo', props.fileInfo)
-  const { txid, height, length, owner, timestamp } = props.fileInfo
+  const { txid, date, tags, dateString } = props.fileInfo
 
   useEffect(() => {
-    let newImageFile = ''
+    let newFileData = ''
     let newStatus = ''
 
-    if (!props.fileInfo.image) {
+    if (!props.fileInfo.fileData) {
       setStatusMessage('loading...')
       let isCancelled = false
 
-      const getImageFile = async () => {
+      const getFileData = async () => {
         const response = await props.fileInfo.request
-        console.log('🚀 ~ file: Files.js ~ line 26 ~ getImageFile ~ response', response)
+        // console.log('🚀 ~ file: Files.js ~ line 42 ~ getFileData ~ response', response)
         switch (response?.status) {
           case 200:
           case 202:
-            props.fileInfo.image = response.data.toString()
+            props.fileInfo.fileData = response.data
             newStatus = ''
-            newImageFile = props.fileInfo.image
+            newFileData = props.fileInfo.fileData
             break
           case 404:
             newStatus = 'Not Found'
@@ -48,14 +57,14 @@ const FileItem = (props) => {
         }
         if (isCancelled) return
 
-        setImageFile(newImageFile)
+        setFileData(newFileData)
         setStatusMessage(newStatus)
       }
       if (props.fileInfo.error) {
-        setImageFile('')
+        setFileData('')
         setStatusMessage(props.fileInfo.error)
       } else {
-        getImageFile()
+        getFileData()
       }
       return () => (isCancelled = true)
     }
@@ -63,12 +72,25 @@ const FileItem = (props) => {
 
   return (
     <>
-      <h4>File Info</h4>
-      <p>Tx ID: {txid}</p>
-      <p>Height: {height}</p>
-      <p>Length: {length}</p>
-      <p>Owner: {owner}</p>
-      <p>Timestamp: {timestamp}</p>
+      <p>Uploaded {date}</p>
+
+      <div>
+        {tags.map((tag) => (
+          <div key={txid}>
+            {tag.name === 'Title' && <h2>Title: {tag.value}</h2>}
+            {tag.name === 'Description' && <h4>Description: {tag.value}</h4>}
+          </div>
+        ))}
+      </div>
+      <div>
+        <h5>TRANSACTION on the Arweave network:</h5>
+
+        <a href={`http://arweave.app/tx/${txid}`} target='_blank' rel='noreferrer'>{`http://arweave.app/tx/${txid}`}</a>
+
+        <h5>The Encrypted FILE:</h5>
+
+        <a href={`http://arweave.net/${txid}`} target='_blank' rel='noreferrer'>{`http://arweave.net/${txid}`}</a>
+      </div>
     </>
   )
 }
