@@ -1,8 +1,8 @@
 import { useState, useRef } from 'react'
 import { ThemeProvider } from 'theme-ui'
 import '@rainbow-me/rainbowkit/styles.css'
-import { getDefaultWallets, RainbowKitProvider, darkTheme, midnightTheme } from '@rainbow-me/rainbowkit'
-import { chain, configureChains, createClient, WagmiConfig } from 'wagmi'
+import { getDefaultWallets, RainbowKitProvider, darkTheme, midnightTheme, lightTheme } from '@rainbow-me/rainbowkit'
+import { chain, configureChains, createClient, WagmiConfig, useAccount } from 'wagmi'
 import { alchemyProvider } from 'wagmi/providers/alchemy'
 import { publicProvider } from 'wagmi/providers/public'
 import { WebBundlr } from '@bundlr-network/client'
@@ -12,13 +12,18 @@ import { MainContext } from '../context'
 import Layout from '../components/Layout'
 import '../styles.css'
 
+const APP_NAME = process.env.ARWEAVE_APP_NAME || 'YOUR_APP_NAME'
+
+// ============= Wagmi and RainbowKit config =============
+
+// 👇 Configure the Chains we want to support, and our Providers (RPCs)
 const { chains, provider } = configureChains(
-  [chain.polygon],
-  [alchemyProvider({ alchemyId: process.env.ALCHEMY_ID }), publicProvider()]
+  [chain.mainnet, chain.polygon],
+  [alchemyProvider({ alchemyId: process.env.ALCHEMY_ID }), publicProvider()] // <- set RPC provider to Alchemy, and if it fails fallback to a public RPC URL
 )
 
 const { connectors } = getDefaultWallets({
-  appName: 'PermaPic',
+  appName: APP_NAME,
   chains,
 })
 
@@ -27,6 +32,8 @@ const wagmiClient = createClient({
   connectors,
   provider,
 })
+
+// ============= Our App =============
 
 function App({ Component, pageProps }) {
   const [bundlrInstance, setBundlrInstance] = useState()
@@ -76,7 +83,16 @@ function App({ Component, pageProps }) {
       <ThemeProvider theme={Theme}>
         <Layout>
           <WagmiConfig client={wagmiClient}>
-            <RainbowKitProvider chains={chains}>
+            <RainbowKitProvider
+              coolMode // <- add a little flair for fun!
+              chains={chains}
+              theme={lightTheme({
+                accentColor: '#3cf', // <- active network indicator color
+                accentColorForeground: 'white', // <- label color of the active network
+                borderRadius: 'large',
+                fontStack: 'system',
+              })}
+            >
               <Component {...pageProps} />
             </RainbowKitProvider>
           </WagmiConfig>
