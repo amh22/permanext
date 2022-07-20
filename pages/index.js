@@ -1,13 +1,14 @@
 /** @jsxImportSource theme-ui */
-import { useContext, useState, useCallback } from 'react'
+import { useContext, useState, useCallback, useEffect } from 'react'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
+import { useAccount } from 'wagmi'
+import { utils } from 'ethers'
 import BigNumber from 'bignumber.js'
 import Head from 'next/head'
 import Image from 'next/image'
 import { MainContext } from '../context'
 import DropZone from '../components/DropZone'
 import prettyBytes from 'pretty-bytes'
-import { utils } from 'ethers'
 import ContainerPage from '../components/ContainerPage'
 import lit from '../libs/lit'
 import { APP_NAME } from '../utils'
@@ -248,6 +249,14 @@ export default function Home() {
       console.log('onDecryptDownloadedData ~ error', error)
     }
   }
+  const account = useAccount()
+  console.log('🚀 ~ file: index.js ~ line 253 ~ Home ~ account', account)
+
+  const { address } = account
+
+  useEffect(() => {
+    console.log('🚀 ~ file: index.js ~ line 256 ~ Home ~ address', address)
+  }, [address])
 
   return (
     <div>

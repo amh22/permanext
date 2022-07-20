@@ -20,6 +20,7 @@ async function getFileInfo() {
 
 export default function Profile() {
   const [fileInfo, setFileInfo] = useState([])
+  console.log('🚀 ~ file: profile.js ~ line 23 ~ Profile ~ fileInfo', fileInfo)
   const [isSearching, setIsSearching] = useState(false)
 
   // 👇 execute our fileInfo query from '../utils'

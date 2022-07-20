@@ -1,7 +1,5 @@
 /** @jsxImportSource theme-ui */
 import { useState, useEffect, useCallback } from 'react'
-import lit from '../libs/lit'
-import Image from 'next/image'
 import { FileDetails } from './FileDetails'
 import { FileEncryptedData } from './FileEncyptedData'
 import { FileImageData } from './FileImageData'
