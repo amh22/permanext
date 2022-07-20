@@ -19,7 +19,7 @@ const APP_NAME = process.env.ARWEAVE_APP_NAME || 'YOUR_APP_NAME'
 // 👇 Configure the Chains we want to support, and our Providers (RPCs)
 const { chains, provider } = configureChains(
   [chain.mainnet, chain.polygon],
-  [alchemyProvider({ alchemyId: process.env.ALCHEMY_ID }), publicProvider()] // <- set RPC provider to Alchemy, and if it fails fallback to the public provider
+  [alchemyProvider({ alchemyId: process.env.ALCHEMY_ID }), publicProvider()] // <- set RPC provider to Alchemy, and if it fails fallback to a public RPC URL
 )
 
 const { connectors } = getDefaultWallets({
