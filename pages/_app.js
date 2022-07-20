@@ -14,9 +14,9 @@ import '../styles.css'
 
 const APP_NAME = process.env.ARWEAVE_APP_NAME || 'YOUR_APP_NAME'
 
-// ============= Wagmi and RainbowKit config =============
+// 👇 ============= Wagmi and RainbowKit config =============
 
-// 👇 Configure the Chains we want to support, and our Providers (RPCs)
+// Configure the Chains we want to support, and our Providers (RPCs)
 const { chains, provider } = configureChains(
   [chain.mainnet, chain.polygon],
   [alchemyProvider({ alchemyId: process.env.ALCHEMY_ID }), publicProvider()] // <- set RPC provider to Alchemy, and if it fails fallback to a public RPC URL
@@ -33,15 +33,15 @@ const wagmiClient = createClient({
   provider,
 })
 
-// ============= Our App =============
+// 👇 ============= Our App =============
 
 function App({ Component, pageProps }) {
   const [bundlrInstance, setBundlrInstance] = useState()
   const [balance, setBalance] = useState()
   const bundlrRef = useRef()
+  const [currency, setCurrency] = useState('matic') // <- set the base currency as matic (this can be changed later via the app UI)
 
-  // set the base currency as matic (this can be changed later via the app UI)
-  const [currency, setCurrency] = useState('matic')
+  // ============= Bundlr Config =============
 
   // create a function to connect to bundlr network
   async function initialiseBundlr() {

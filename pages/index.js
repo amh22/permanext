@@ -33,6 +33,8 @@ export default function Home() {
 
   const { initialiseBundlr, bundlrInstance, fetchBalance, balance } = useContext(MainContext)
 
+  const { address, isConnected } = useAccount() // <- get wallet info and status
+
   async function initialise() {
     initialiseBundlr()
   }
@@ -249,14 +251,11 @@ export default function Home() {
       console.log('onDecryptDownloadedData ~ error', error)
     }
   }
-  const account = useAccount()
-  console.log('🚀 ~ file: index.js ~ line 253 ~ Home ~ account', account)
-
-  const { address } = account
 
   useEffect(() => {
     console.log('🚀 ~ file: index.js ~ line 256 ~ Home ~ address', address)
-  }, [address])
+    console.log('🚀 ~ file: index.js ~ line 256 ~ Home ~ isConnected', isConnected)
+  }, [address, isConnected])
 
   return (
     <div>
@@ -270,12 +269,20 @@ export default function Home() {
           Encypt with Lit and save to the Arweave network. Then, read back from the Arweave network and decrypt with
           Lit.
         </h3>
-        {!balance && <button onClick={initialise}>1. Connect Bundlr</button>}
-        {balance && (
+        {isConnected && (
+          <>
+            <div>
+              <h3>1. Connect To Bundlr</h3>
+            </div>
+            <button onClick={initialise} disabled={balance}>
+              Connect Bundlr
+            </button>
+          </>
+        )}
+        {isConnected && balance && (
           <>
             {/* ============= Step 1 ============= */}
             <div>
-              <h3>1. Connect To Bundlr</h3>
               <h4>You are connected to bundlr</h4>
               <h4>Your bundlr Balance: {balance}</h4>
             </div>
