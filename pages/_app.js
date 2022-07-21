@@ -18,7 +18,7 @@ const APP_NAME = process.env.ARWEAVE_APP_NAME || 'YOUR_APP_NAME'
 
 // Configure the Chains we want to support, and our Providers (RPCs)
 const { chains, provider } = configureChains(
-  [chain.mainnet, chain.polygon],
+  [chain.polygon, chain.mainnet],
   [alchemyProvider({ alchemyId: process.env.ALCHEMY_ID }), publicProvider()] // <- set RPC provider to Alchemy, and if it fails fallback to a public RPC URL
 )
 
@@ -37,6 +37,7 @@ const wagmiClient = createClient({
 
 function App({ Component, pageProps }) {
   const [bundlrInstance, setBundlrInstance] = useState()
+  const [createdBy, setCreatedBy] = useState()
   const [balance, setBalance] = useState()
   const bundlrRef = useRef()
   const [currency, setCurrency] = useState('matic') // <- set the base currency as matic (this can be changed later via the app UI)
@@ -48,12 +49,15 @@ function App({ Component, pageProps }) {
     await window.ethereum.enable()
 
     const provider = new providers.Web3Provider(window.ethereum)
-    console.log('🚀 ~ file: _app.js ~ line 24 ~ initialiseBundlr ~ provider', provider)
+
     await provider._ready()
 
     const bundlr = new WebBundlr('https://node1.bundlr.network', currency, provider)
     await bundlr.ready()
 
+    const ownerAddress = bundlr.address // <- get owner address so we can post it as a tag when uploading to Arweave, then we can query connected wallet addresses
+
+    setCreatedBy(ownerAddress)
     setBundlrInstance(bundlr)
 
     // set the current value of 'bundlrRef' to 'bundlr'
@@ -66,7 +70,7 @@ function App({ Component, pageProps }) {
 
   async function fetchBalance() {
     const bal = await bundlrRef.current.getLoadedBalance()
-    console.log('🚀 ~ fetchBalance ~ balance ', utils.formatEther(bal.toString()))
+
     // format the returned value and store to state
     setBalance(utils.formatEther(bal.toString()))
   }
@@ -78,6 +82,7 @@ function App({ Component, pageProps }) {
         bundlrInstance,
         fetchBalance,
         balance,
+        createdBy,
       }}
     >
       <ThemeProvider theme={Theme}>

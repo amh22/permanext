@@ -14,6 +14,7 @@ import lit from '../libs/lit'
 import { APP_NAME } from '../utils'
 
 export default function Home() {
+  const [accountAddress, setAccountAddress] = useState(null)
   const [fundingAmount, setFundingAmount] = useState(null)
   const [file, setFile] = useState(null)
   const [fileTypeError, setFileTypeError] = useState({ error: false, message: '' })
@@ -31,7 +32,7 @@ export default function Home() {
   const [downloadedEncryptedData, setDownloadedEncryptedData] = useState(null)
   const [decryptedData, setDecryptedData] = useState(null)
 
-  const { initialiseBundlr, bundlrInstance, fetchBalance, balance } = useContext(MainContext)
+  const { initialiseBundlr, bundlrInstance, fetchBalance, balance, createdBy } = useContext(MainContext)
 
   const { address, isConnected } = useAccount() // <- get wallet info and status
 
@@ -204,7 +205,6 @@ export default function Home() {
       { name: 'Title', value: imageTitle },
       { name: 'Description', value: imageDescription },
     ]
-    console.log('🚀 ~ file: index.js ~ line 205 ~ onClickSignAndUpload ~ tags', tags)
 
     // Sign AND Upload
     try {
@@ -253,9 +253,11 @@ export default function Home() {
   }
 
   useEffect(() => {
-    console.log('🚀 ~ file: index.js ~ line 256 ~ Home ~ address', address)
+    // console.log('🚀 ~ file: index.js ~ line 256 ~ Home ~ address', address)
     console.log('🚀 ~ file: index.js ~ line 256 ~ Home ~ isConnected', isConnected)
-  }, [address, isConnected])
+    setAccountAddress(address)
+    console.log('🚀 ~ file: index.js ~ line 256 ~ accountAddress', accountAddress)
+  }, [address, isConnected, accountAddress])
 
   return (
     <div>
@@ -272,10 +274,10 @@ export default function Home() {
         {isConnected && (
           <>
             <div>
-              <h3>1. Connect To Bundlr</h3>
+              <h3>1. Connect To The Bundlr network</h3>
             </div>
             <button onClick={initialise} disabled={balance}>
-              Connect Bundlr
+              {balance ? 'You are connected' : 'Connect Bundlr'}
             </button>
           </>
         )}
@@ -284,7 +286,7 @@ export default function Home() {
             {/* ============= Step 1 ============= */}
             <div>
               <h4>You are connected to bundlr</h4>
-              <h4>Your bundlr Balance: {balance}</h4>
+              <h4>Your bundlr Matic balance is: {balance}</h4>
             </div>
 
             {/* ---- fund your bundlr wallet ---- */}
