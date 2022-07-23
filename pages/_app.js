@@ -95,6 +95,7 @@ function App({ Component, pageProps }) {
               accentColorForeground: 'white', // <- label color of the active network
               borderRadius: 'large',
               fontStack: 'system',
+              height: '100%',
             })}
           >
             <Layout>

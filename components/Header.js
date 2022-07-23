@@ -30,7 +30,6 @@ export default function Header({ children }) {
               sx={{
                 display: 'flex',
                 flex: '0 0 30%',
-                border: '1px solid blue',
                 justifyContent: 'left',
                 alignItems: 'center',
               }}
@@ -52,7 +51,7 @@ export default function Header({ children }) {
               <ConnectButton />
             </div>
           </ul>
-          <div sx={{ display: 'flex', flex: '0 0 10%', justifyContent: 'center', border: '1px solid red' }}>
+          <div sx={{ display: 'flex', flex: '0 0 10%', justifyContent: 'center' }}>
             <ColorModeSwitch />
           </div>
         </nav>
@@ -106,7 +105,6 @@ export default function Header({ children }) {
 
 const styles = {
   logo: {
-    border: '1px solid red',
     listStyle: 'none',
     display: 'flex',
     color: 'text',
