@@ -4,6 +4,7 @@ import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useAccount } from 'wagmi'
 import { utils } from 'ethers'
 import BigNumber from 'bignumber.js'
+import { useRouter } from 'next/router'
 import Head from 'next/head'
 import Image from 'next/image'
 import { MainContext } from '../context'
@@ -38,6 +39,8 @@ export default function Home() {
   const { initialiseBundlr, bundlrInstance, fetchBalance, balance, createdBy } = useContext(MainContext)
 
   const { address, isConnected } = useAccount() // <- get wallet info and status
+
+  const router = useRouter()
 
   async function initialise() {
     initialiseBundlr()
@@ -209,6 +212,7 @@ export default function Home() {
       { name: 'App-Name', value: APP_NAME },
       { name: 'Title', value: imageTitle },
       { name: 'Description', value: imageDescription },
+      { name: 'Created-By', value: createdBy },
     ]
 
     // Sign AND Upload
@@ -357,7 +361,6 @@ export default function Home() {
             {isEncrypted === 'success' && (
               <div>
                 <h4>4. Upload Your File</h4>
-                <h4 sx={{ color: 'red' }}>Should only show Upload AFTER encryption</h4>
                 <h5>Upload your file to the permaweb.</h5>
                 <h5>Encrypted File Size: {fileSize}</h5>
                 <h5>ESTIMATED Cost to upload encrypted file: {fileCost}</h5>

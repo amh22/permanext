@@ -86,22 +86,22 @@ function App({ Component, pageProps }) {
       }}
     >
       <ThemeProvider theme={Theme}>
-        <Layout>
-          <WagmiConfig client={wagmiClient}>
-            <RainbowKitProvider
-              coolMode // <- add a little flair for fun!
-              chains={chains}
-              theme={lightTheme({
-                accentColor: '#3cf', // <- active network indicator color
-                accentColorForeground: 'white', // <- label color of the active network
-                borderRadius: 'large',
-                fontStack: 'system',
-              })}
-            >
+        <WagmiConfig client={wagmiClient}>
+          <RainbowKitProvider
+            coolMode // <- add a little flair for fun!
+            chains={chains}
+            theme={lightTheme({
+              accentColor: '#3cf', // <- active network indicator color
+              accentColorForeground: 'white', // <- label color of the active network
+              borderRadius: 'large',
+              fontStack: 'system',
+            })}
+          >
+            <Layout>
               <Component {...pageProps} />
-            </RainbowKitProvider>
-          </WagmiConfig>
-        </Layout>
+            </Layout>
+          </RainbowKitProvider>
+        </WagmiConfig>
       </ThemeProvider>
     </MainContext.Provider>
   )
