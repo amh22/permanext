@@ -16,7 +16,7 @@ export default function Layout({ children }) {
         sx={{
           display: 'flex',
           flexDirection: 'column',
-          minHeight: '100%',
+          minHeight: '100vh',
           backgroundColor: 'background',
         }}
       >
