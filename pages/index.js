@@ -1,6 +1,5 @@
 /** @jsxImportSource theme-ui */
 import { useContext, useState, useCallback, useEffect } from 'react'
-import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useAccount } from 'wagmi'
 import { utils } from 'ethers'
 import BigNumber from 'bignumber.js'
@@ -251,8 +250,6 @@ export default function Home() {
 
     const encryptedContent = dataURItoBlob(downloadedEncryptedData.encryptedData)
 
-    console.log('🚀 ~ file: index.js ~ line 226 ~ onDecryptDownloadedData ~ encryptedContent', encryptedContent)
-
     try {
       const decryptData = await lit.decrypt(encryptedContent, accessConditions, encryptedSymmetricKey)
 
@@ -265,10 +262,7 @@ export default function Home() {
   }
 
   useEffect(() => {
-    // console.log('🚀 ~ file: index.js ~ line 256 ~ Home ~ address', address)
-    console.log('🚀 ~ file: index.js ~ line 256 ~ Home ~ isConnected', isConnected)
     setAccountAddress(address)
-    console.log('🚀 ~ file: index.js ~ line 256 ~ accountAddress', accountAddress)
   }, [address, isConnected, accountAddress])
 
   return (
@@ -278,7 +272,6 @@ export default function Home() {
         <meta name='description' content='Encrypt and upload images to the Arweave permaweb network.' />
       </Head>
       <ContainerPage>
-        <ConnectButton />
         {isConnected && (
           <>
             <div>

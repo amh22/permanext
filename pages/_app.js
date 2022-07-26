@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { ThemeProvider } from 'theme-ui'
 import '@rainbow-me/rainbowkit/styles.css'
 import { getDefaultWallets, RainbowKitProvider, darkTheme, midnightTheme, lightTheme } from '@rainbow-me/rainbowkit'
-import { chain, configureChains, createClient, WagmiConfig, useAccount } from 'wagmi'
+import { chain, configureChains, createClient, WagmiConfig } from 'wagmi'
 import { alchemyProvider } from 'wagmi/providers/alchemy'
 import { publicProvider } from 'wagmi/providers/public'
 import { WebBundlr } from '@bundlr-network/client'
@@ -95,7 +95,6 @@ function App({ Component, pageProps }) {
               accentColorForeground: 'white', // <- label color of the active network
               borderRadius: 'large',
               fontStack: 'system',
-              // height: '100%',
             })}
           >
             <Layout>

@@ -2,6 +2,7 @@
 import { Themed } from 'theme-ui'
 import Link from 'next/link'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
+
 import ColorModeSwitch from './ColorModeSwitch'
 import ContainerHeader from './ContainerHeader'
 
