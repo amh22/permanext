@@ -263,7 +263,7 @@ export default function Home() {
 
   useEffect(() => {
     setAccountAddress(address)
-  }, [address, isConnected, accountAddress])
+  }, [address])
 
   return (
     <div>
@@ -272,19 +272,28 @@ export default function Home() {
         <meta name='description' content='Encrypt and upload images to the Arweave permaweb network.' />
       </Head>
       <ContainerPage>
-        {isConnected && (
-          <>
+        <h3>Store an encrypted image permanently on the Arweave network.</h3>
+        {/* ============= Step 1 ============= */}
+        <>
+          <div>
+            <h3>1. Connect To The Bundlr network</h3>
+          </div>
+          <button
+            onClick={initialise}
+            disabled={!isConnected}
+            sx={{ cursor: !isConnected ? 'not-allowed' : 'pointer' }}
+          >
+            {balance ? 'You are connected' : 'Connect to Bundlr'}
+          </button>
+          {!isConnected && (
             <div>
-              <h3>1. Connect To The Bundlr network</h3>
+              <p sx={{ color: 'red' }}>You must first connect your wallet before you can connect to bundlr.</p>
             </div>
-            <button onClick={initialise} disabled={balance}>
-              {balance ? 'You are connected' : 'Connect Bundlr'}
-            </button>
-          </>
-        )}
+          )}
+        </>
+
         {isConnected && balance && (
           <>
-            {/* ============= Step 1 ============= */}
             <div>
               <h4>You are connected to bundlr</h4>
               <h4>Your bundlr Matic balance is: {balance}</h4>
