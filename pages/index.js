@@ -12,6 +12,7 @@ import prettyBytes from 'pretty-bytes'
 import ContainerPage from '../components/ContainerPage'
 import lit from '../libs/lit'
 import { APP_NAME } from '../utils'
+import { LoadingRings } from '../components/LoadingIndictor'
 
 export default function Home() {
   const [accountAddress, setAccountAddress] = useState(null)
@@ -36,6 +37,7 @@ export default function Home() {
   const [decryptedData, setDecryptedData] = useState(null)
 
   const { initialiseBundlr, bundlrInstance, fetchBalance, balance, createdBy } = useContext(MainContext)
+  console.log(typeof balance)
 
   const { address, isConnected } = useAccount() // <- get wallet info and status
 
@@ -276,12 +278,12 @@ export default function Home() {
         {/* ============= Step 1 ============= */}
         <>
           <div>
-            <h3>1. Connect To The Bundlr network</h3>
+            <h3>1. Connect To The Bundlr Network</h3>
           </div>
           <button
             onClick={initialise}
-            disabled={!isConnected}
-            sx={{ cursor: !isConnected ? 'not-allowed' : 'pointer' }}
+            disabled={!isConnected || balance}
+            sx={{ cursor: !isConnected || balance ? 'not-allowed' : 'pointer' }}
           >
             {balance ? 'You are connected' : 'Connect to Bundlr'}
           </button>
@@ -292,11 +294,15 @@ export default function Home() {
           )}
         </>
 
+        <LoadingRings />
         {isConnected && balance && (
           <>
             <div>
-              <h4>You are connected to bundlr</h4>
-              <h4>Your bundlr Matic balance is: {balance}</h4>
+              <p>You are now connected to the bundlr network.</p>
+              <div sx={{ display: 'flex', m: 0, p: 0 }}>
+                <p>Your bundlr balance is:</p>
+                <p sx={{ fontWeight: '700', pl: 2 }}>{balance} matic</p>
+              </div>
             </div>
 
             {/* ---- fund your bundlr wallet ---- */}
@@ -312,11 +318,7 @@ export default function Home() {
 
             {/* ============= Step 2 ============= */}
             <div>
-              <h4>2. Choose An Image</h4>
-              <h5>Select the image you want to upload.</h5>
-              {/* <input type='file' onChange={onFileChange} /> */}
-              {/* <button onClick={uploadFile}>Upload File</button> */}
-
+              <h4>2. Select An Image</h4>
               <DropZone onDrop={onDropFile} />
             </div>
 

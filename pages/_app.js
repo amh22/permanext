@@ -70,9 +70,10 @@ function App({ Component, pageProps }) {
 
   async function fetchBalance() {
     const bal = await bundlrRef.current.getLoadedBalance()
-
+    const balToString = utils.formatEther(bal.toString())
+    const balRounded = balToString.substring(0, 4)
     // format the returned value and store to state
-    setBalance(utils.formatEther(bal.toString()))
+    setBalance(balRounded)
   }
 
   return (
