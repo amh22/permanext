@@ -96,17 +96,17 @@ body,
 /* Dual Ring */
 .lds-dual-ring {
   display: inline-block;
-  width: 80px;
-  height: 80px;
+  width: 40px;
+  height: 40px;
 }
 .lds-dual-ring:after {
   content: ' ';
   display: block;
-  width: 32px;
-  height: 32px;
-  margin: 8px;
+  width: 16px;
+  height: 16px;
+  margin: 10px;
   border-radius: 50%;
-  border: 6px solid #3cf;
+  border: 3px solid #3cf;
   border-color: #3cf transparent #3cf transparent;
   animation: lds-dual-ring 1.2s linear infinite;
 }

@@ -16,10 +16,10 @@ const APP_NAME = process.env.ARWEAVE_APP_NAME || 'YOUR_APP_NAME'
 
 // 👇 ============= Wagmi and RainbowKit config =============
 
-// Configure the Chains we want to support, and our Providers (RPCs)
+// Configure the Chains / Networks we want to support along with Provider/s  (RPCs) for the Chains
 const { chains, provider } = configureChains(
-  [chain.polygon, chain.mainnet],
-  [alchemyProvider({ alchemyId: process.env.ALCHEMY_ID }), publicProvider()] // <- set RPC provider to Alchemy, and if it fails fallback to a public RPC URL
+  [chain.polygon], // we are only supporting Polygon
+  [alchemyProvider({ alchemyId: process.env.ALCHEMY_ID }), publicProvider()] // <- set RPC provider to Alchemy, and in case Alchemy does not support the chain, fall back to the public RPC URL
 )
 
 const { connectors } = getDefaultWallets({
@@ -52,8 +52,12 @@ function App({ Component, pageProps }) {
 
     await provider._ready()
 
+    console.log('🚀 ~ file: _app.js ~ line 54 ~ initialiseBundlr ~ provider', provider)
+
     const bundlr = new WebBundlr('https://node1.bundlr.network', currency, provider)
     await bundlr.ready()
+
+    console.log('🚀 ~ file: _app.js ~ line 57 ~ initialiseBundlr ~ bundlr', bundlr)
 
     const ownerAddress = bundlr.address // <- get owner address so we can post it as a tag when uploading to Arweave, then we can query connected wallet addresses
 

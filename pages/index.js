@@ -16,6 +16,7 @@ import { LoadingRings } from '../components/LoadingIndictor'
 
 export default function Home() {
   const [accountAddress, setAccountAddress] = useState(null)
+  const [bundlrConnected, setBundlrConnected] = useState(null)
   const [fundingAmount, setFundingAmount] = useState(null)
   const [file, setFile] = useState(null)
   const [fileTypeError, setFileTypeError] = useState({ error: false, message: '' })
@@ -37,14 +38,15 @@ export default function Home() {
   const [decryptedData, setDecryptedData] = useState(null)
 
   const { initialiseBundlr, bundlrInstance, fetchBalance, balance, createdBy } = useContext(MainContext)
-  console.log(typeof balance)
 
   const { address, isConnected } = useAccount() // <- get wallet info and status
 
   const router = useRouter()
 
   async function initialise() {
-    initialiseBundlr()
+    setBundlrConnected('connecting')
+    await initialiseBundlr()
+    setBundlrConnected('connected')
   }
 
   // ============= Allow User To Fund Their Wallet =============
@@ -280,13 +282,36 @@ export default function Home() {
           <div>
             <h3>1. Connect To The Bundlr Network</h3>
           </div>
-          <button
-            onClick={initialise}
-            disabled={!isConnected || balance}
-            sx={{ cursor: !isConnected || balance ? 'not-allowed' : 'pointer' }}
+          <div
+            sx={{
+              display: 'flex',
+              justifyContent: 'start',
+              alignItems: 'center',
+              height: '40px',
+              contain: 'content',
+            }}
           >
-            {balance ? 'You are connected' : 'Connect to Bundlr'}
-          </button>
+            <div>
+              <button
+                onClick={initialise}
+                disabled={!isConnected || balance || bundlrConnected === 'connecting'}
+                sx={{ cursor: !isConnected || balance || bundlrConnected === 'connecting' ? 'not-allowed' : 'pointer' }}
+              >
+                {balance ? 'You are connected' : 'Connect to Bundlr'}
+              </button>
+            </div>
+            {bundlrConnected === 'connecting' && (
+              <>
+                <div sx={{ display: 'flex', m: 3 }}>
+                  {' '}
+                  <LoadingRings />
+                </div>
+                <div>
+                  <p>Sign with your wallet...</p>
+                </div>
+              </>
+            )}
+          </div>
           {!isConnected && (
             <div>
               <p sx={{ color: 'red' }}>You must first connect your wallet before you can connect to bundlr.</p>
@@ -294,7 +319,6 @@ export default function Home() {
           )}
         </>
 
-        <LoadingRings />
         {isConnected && balance && (
           <>
             <div>
