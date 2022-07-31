@@ -46,18 +46,15 @@ function App({ Component, pageProps }) {
 
   // create a function to connect to bundlr network
   async function initialiseBundlr() {
-    await window.ethereum.enable()
+    await ethereum.request({ method: 'eth_requestAccounts' })
+    // await window.ethereum.enable()
 
     const provider = new providers.Web3Provider(window.ethereum)
 
     await provider._ready()
 
-    console.log('🚀 ~ file: _app.js ~ line 54 ~ initialiseBundlr ~ provider', provider)
-
     const bundlr = new WebBundlr('https://node1.bundlr.network', currency, provider)
     await bundlr.ready()
-
-    console.log('🚀 ~ file: _app.js ~ line 57 ~ initialiseBundlr ~ bundlr', bundlr)
 
     const ownerAddress = bundlr.address // <- get owner address so we can post it as a tag when uploading to Arweave, then we can query connected wallet addresses
 
