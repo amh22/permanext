@@ -1,6 +1,5 @@
 /** @jsxImportSource theme-ui */
 import Head from 'next/head'
-
 import Header from './Header'
 import Footer from './Footer'
 
@@ -16,7 +15,7 @@ export default function Layout({ children }) {
         sx={{
           display: 'flex',
           flexDirection: 'column',
-          minHeight: '100%',
+          minHeight: '100vh',
           backgroundColor: 'background',
         }}
       >

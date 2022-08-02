@@ -12,6 +12,7 @@ export default function ContainerHeader({ children }) {
         borderBottom: '1px solid gray',
         display: 'flex',
         justifyContent: 'center',
+        flexDirection: 'column',
       }}
     >
       {children}

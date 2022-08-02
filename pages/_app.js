@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { ThemeProvider } from 'theme-ui'
 import '@rainbow-me/rainbowkit/styles.css'
 import { getDefaultWallets, RainbowKitProvider, darkTheme, midnightTheme, lightTheme } from '@rainbow-me/rainbowkit'
-import { chain, configureChains, createClient, WagmiConfig, useAccount } from 'wagmi'
+import { chain, configureChains, createClient, WagmiConfig } from 'wagmi'
 import { alchemyProvider } from 'wagmi/providers/alchemy'
 import { publicProvider } from 'wagmi/providers/public'
 import { WebBundlr } from '@bundlr-network/client'
@@ -14,14 +14,16 @@ import '../styles.css'
 
 const APP_NAME = process.env.ARWEAVE_APP_NAME || 'YOUR_APP_NAME'
 
-// ============= Wagmi and RainbowKit config =============
+// 👇 ============= Wagmi and RainbowKit config =============
 
-// 👇 Configure the Chains we want to support, and our Providers (RPCs)
+// Configure the Chains / Networks we want to support along with Provider/s  (RPCs) for the Chains
 const { chains, provider } = configureChains(
-  [chain.mainnet, chain.polygon],
-  [alchemyProvider({ alchemyId: process.env.ALCHEMY_ID }), publicProvider()] // <- set RPC provider to Alchemy, and if it fails fallback to a public RPC URL
+  [chain.polygon], // we are only supporting Polygon
+  [alchemyProvider({ alchemyId: process.env.ALCHEMY_ID }), publicProvider()] // <- set RPC provider to Alchemy, and in case Alchemy does not support the chain, fall back to the public RPC URL
 )
 
+// getDefaultWallets function sets up the following wallets:
+// Rainbow, MetaMask, WalletConnect, Coinbase
 const { connectors } = getDefaultWallets({
   appName: APP_NAME,
   chains,
@@ -33,27 +35,37 @@ const wagmiClient = createClient({
   provider,
 })
 
-// ============= Our App =============
+// 👇 ============= Our App =============
 
 function App({ Component, pageProps }) {
   const [bundlrInstance, setBundlrInstance] = useState()
+  const [createdBy, setCreatedBy] = useState()
   const [balance, setBalance] = useState()
   const bundlrRef = useRef()
+  const [currency, setCurrency] = useState('matic') // <- set the base currency as matic (this can be changed later via the app UI)
 
-  // set the base currency as matic (this can be changed later via the app UI)
-  const [currency, setCurrency] = useState('matic')
+  // ============= Bundlr Config =============
 
   // create a function to connect to bundlr network
   async function initialiseBundlr() {
-    await window.ethereum.enable()
-
+    // We are using MetaMask to sign the connection to Bundlr
+    // Remember we have already asked a user to choose which wallet they want to connect to our dApp with (using RainbowKit in the Header)
+    // await ethereum.request({ method: 'eth_requestAccounts' })
     const provider = new providers.Web3Provider(window.ethereum)
-    console.log('🚀 ~ file: _app.js ~ line 24 ~ initialiseBundlr ~ provider', provider)
     await provider._ready()
 
-    const bundlr = new WebBundlr('https://node1.bundlr.network', currency, provider)
+    // const bundlr = new WebBundlr('https://node1.bundlr.network', currency, provider)
+
+    // Our Alchemy Polygon Provider
+    const bundlr = new WebBundlr('https://node1.bundlr.network', currency, provider, {
+      providerUrl: process.env.ALCHEMY_RPC_URL,
+    })
+
     await bundlr.ready()
 
+    const ownerAddress = bundlr.address // <- get owner address so we can post it as a tag when uploading to Arweave, then we can query connected wallet addresses
+
+    setCreatedBy(ownerAddress)
     setBundlrInstance(bundlr)
 
     // set the current value of 'bundlrRef' to 'bundlr'
@@ -66,9 +78,10 @@ function App({ Component, pageProps }) {
 
   async function fetchBalance() {
     const bal = await bundlrRef.current.getLoadedBalance()
-    console.log('🚀 ~ fetchBalance ~ balance ', utils.formatEther(bal.toString()))
+    const balToString = utils.formatEther(bal.toString())
+    const balRounded = balToString.substring(0, 4)
     // format the returned value and store to state
-    setBalance(utils.formatEther(bal.toString()))
+    setBalance(balRounded)
   }
 
   return (
@@ -78,25 +91,26 @@ function App({ Component, pageProps }) {
         bundlrInstance,
         fetchBalance,
         balance,
+        createdBy,
       }}
     >
       <ThemeProvider theme={Theme}>
-        <Layout>
-          <WagmiConfig client={wagmiClient}>
-            <RainbowKitProvider
-              coolMode // <- add a little flair for fun!
-              chains={chains}
-              theme={lightTheme({
-                accentColor: '#3cf', // <- active network indicator color
-                accentColorForeground: 'white', // <- label color of the active network
-                borderRadius: 'large',
-                fontStack: 'system',
-              })}
-            >
+        <WagmiConfig client={wagmiClient}>
+          <RainbowKitProvider
+            coolMode // <- add a little flair for fun!
+            chains={chains}
+            theme={lightTheme({
+              accentColor: '#3cf', // <- active network indicator color
+              accentColorForeground: 'white', // <- label color of the active network
+              borderRadius: 'large',
+              fontStack: 'system',
+            })}
+          >
+            <Layout>
               <Component {...pageProps} />
-            </RainbowKitProvider>
-          </WagmiConfig>
-        </Layout>
+            </Layout>
+          </RainbowKitProvider>
+        </WagmiConfig>
       </ThemeProvider>
     </MainContext.Provider>
   )
