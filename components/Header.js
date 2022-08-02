@@ -1,6 +1,8 @@
 /** @jsxImportSource theme-ui */
 import { Themed } from 'theme-ui'
 import Link from 'next/link'
+import { ConnectButton } from '@rainbow-me/rainbowkit'
+
 import ColorModeSwitch from './ColorModeSwitch'
 import ContainerHeader from './ContainerHeader'
 
@@ -11,10 +13,10 @@ export default function Header({ children }) {
         <nav
           sx={{
             maxWidth: 'layoutPlus',
-
             display: 'flex',
             width: '100%',
             alignItems: 'center',
+            mb: 3,
           }}
         >
           <ul
@@ -25,18 +27,51 @@ export default function Header({ children }) {
               pl: 2,
             }}
           >
-            <div sx={{ display: 'flex', flex: '0 0 30%' }}>
-              <Themed.li sx={{ px: 0 }}>
+            <div
+              sx={{
+                display: 'flex',
+                flex: '0 0 30%',
+                justifyContent: 'left',
+                alignItems: 'center',
+              }}
+            >
+              <li sx={styles.logo}>
                 <Link href='/' passHref>
                   <a sx={styles.navLink}>PermaPic</a>
                 </Link>
-              </Themed.li>
+              </li>
             </div>
             <div
               sx={{
                 display: 'flex',
                 flex: '1 1 60%',
                 justifyContent: 'flex-end',
+                flexWrap: 'wrap',
+              }}
+            >
+              <ConnectButton />
+            </div>
+          </ul>
+          <div sx={{ display: 'flex', flex: '0 0 10%', justifyContent: 'center' }}>
+            <ColorModeSwitch />
+          </div>
+        </nav>
+        {/* Main Navigation */}
+        <nav
+          sx={{
+            maxWidth: 'layoutPlus',
+          }}
+        >
+          <ul
+            sx={{
+              width: '100%',
+              m: 0,
+            }}
+          >
+            <div
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
                 flexWrap: 'wrap',
               }}
             >
@@ -62,9 +97,6 @@ export default function Header({ children }) {
               </Themed.li>
             </div>
           </ul>
-          <div sx={{ display: 'flex', flex: '0 0 10%', justifyContent: 'center' }}>
-            <ColorModeSwitch />
-          </div>
         </nav>
       </ContainerHeader>
     </header>
@@ -72,6 +104,14 @@ export default function Header({ children }) {
 }
 
 const styles = {
+  logo: {
+    listStyle: 'none',
+    display: 'flex',
+    color: 'text',
+    variant: 'text.paragraph',
+    fontSize: [4, 4, 4, 4],
+    px: [0, 0, 0, 0],
+  },
   navLink: {
     fontSize: 2,
     textTransform: 'none',

@@ -1,9 +1,9 @@
 /** @jsxImportSource theme-ui */
 import { useContext, useState, useCallback, useEffect } from 'react'
-import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useAccount } from 'wagmi'
 import { utils } from 'ethers'
 import BigNumber from 'bignumber.js'
+import { useRouter } from 'next/router'
 import Head from 'next/head'
 import Image from 'next/image'
 import { MainContext } from '../context'
@@ -12,8 +12,12 @@ import prettyBytes from 'pretty-bytes'
 import ContainerPage from '../components/ContainerPage'
 import lit from '../libs/lit'
 import { APP_NAME } from '../utils'
+import { LoadingRings } from '../components/LoadingIndictor'
 
 export default function Home() {
+  const [hasMounted, setHasMounted] = useState(false)
+  const [accountAddress, setAccountAddress] = useState(null)
+  const [bundlrConnected, setBundlrConnected] = useState(null)
   const [fundingAmount, setFundingAmount] = useState(null)
   const [file, setFile] = useState(null)
   const [fileTypeError, setFileTypeError] = useState({ error: false, message: '' })
@@ -27,14 +31,23 @@ export default function Home() {
   const [accessConditions, setAccessConditions] = useState(null)
   const [encryptedData, setEncryptedData] = useState(null)
   const [encryptedSymmetricKey, setEncryptedSymmetricKey] = useState(null)
+  const [isEncrypted, setIsEncrypted] = useState(null)
   const [txId, setTxId] = useState(null)
+  const [uploadError, setUploadError] = useState(null)
+  const [isUploaded, setIsUploaded] = useState(null)
   const [downloadedEncryptedData, setDownloadedEncryptedData] = useState(null)
   const [decryptedData, setDecryptedData] = useState(null)
 
-  const { initialiseBundlr, bundlrInstance, fetchBalance, balance } = useContext(MainContext)
+  const { initialiseBundlr, bundlrInstance, fetchBalance, balance, createdBy } = useContext(MainContext)
+
+  const { address, isConnected } = useAccount() // <- get wallet info and status
+
+  const router = useRouter()
 
   async function initialise() {
-    initialiseBundlr()
+    setBundlrConnected('connecting')
+    await initialiseBundlr()
+    setBundlrConnected('connected')
   }
 
   // ============= Allow User To Fund Their Wallet =============
@@ -101,28 +114,6 @@ export default function Home() {
     }
   }, [])
 
-  // ============= Handle Image File Selection =============
-  // function onFileChange(e) {
-  //   const file = e.target.files[0]
-
-  //   if (file) {
-  //     // 👇 give us a nice way to VIEW the IMAGE in our UI
-  //     const image = URL.createObjectURL(file)
-  //     console.log('🚀 ~ file: index.js ~ line 79~ image', image)
-  //     setImage(image) // <- now to save the FILE locally
-
-  //     // 👇 this is the encoded file sent to Arweave
-  //     let reader = new FileReader()
-  //     reader.onload = function () {
-  //       if (reader.result) {
-  //         setFile(Buffer.from(reader.result)) // <- save the file locally
-  //       }
-  //       console.log('line 87 - file:', file)
-  //     }
-  //     reader.readAsArrayBuffer(file)
-  //   }
-  // }
-
   // ============= Handle Image Encryption =============
   const onClickEncryptImage = async () => {
     // const fileInBase64 = btoa(file)
@@ -145,8 +136,10 @@ export default function Home() {
       setAccessConditions(accessConditions)
       setEncryptedData(encryptedFileInDataURI)
       setEncryptedSymmetricKey(encryptedFile.encryptedSymmetricKey)
+      setIsEncrypted('success')
     } catch (error) {
       console.log('onClickEncryptImage ~ error', error)
+      setIsEncrypted('error')
     }
   }
 
@@ -201,8 +194,8 @@ export default function Home() {
       { name: 'App-Name', value: APP_NAME },
       { name: 'Title', value: imageTitle },
       { name: 'Description', value: imageDescription },
+      { name: 'Created-By', value: createdBy },
     ]
-    console.log('🚀 ~ file: index.js ~ line 205 ~ onClickSignAndUpload ~ tags', tags)
 
     // Sign AND Upload
     try {
@@ -210,9 +203,12 @@ export default function Home() {
       console.log('🚀 ~ file: index.js ~ line 175 ~ onClickSignAndUpload ~ tx', tx)
 
       fetchBalance()
+      setIsUploaded('success')
       setTxId(tx.data.id)
     } catch (error) {
       console.log('There was an error uploading the image: ', error)
+      setUploadError(`${error.message}. Please try again.`)
+      setIsUploaded('error')
     }
   }
 
@@ -237,8 +233,6 @@ export default function Home() {
 
     const encryptedContent = dataURItoBlob(downloadedEncryptedData.encryptedData)
 
-    console.log('🚀 ~ file: index.js ~ line 226 ~ onDecryptDownloadedData ~ encryptedContent', encryptedContent)
-
     try {
       const decryptData = await lit.decrypt(encryptedContent, accessConditions, encryptedSymmetricKey)
 
@@ -249,35 +243,74 @@ export default function Home() {
       console.log('onDecryptDownloadedData ~ error', error)
     }
   }
-  const account = useAccount()
-  console.log('🚀 ~ file: index.js ~ line 253 ~ Home ~ account', account)
-
-  const { address } = account
 
   useEffect(() => {
-    console.log('🚀 ~ file: index.js ~ line 256 ~ Home ~ address', address)
+    setHasMounted(true)
+    setAccountAddress(address)
   }, [address])
+
+  if (!hasMounted) {
+    return null
+  }
 
   return (
     <div>
       <Head>
-        <title>Decrypt A File</title>
+        <title>Upload Encrypted File</title>
         <meta name='description' content='Encrypt and upload images to the Arweave permaweb network.' />
       </Head>
       <ContainerPage>
-        <ConnectButton />
-        <h3 sx={{ color: 'primary' }}>
-          Encypt with Lit and save to the Arweave network. Then, read back from the Arweave network and decrypt with
-          Lit.
-        </h3>
-        {!balance && <button onClick={initialise}>1. Connect Bundlr</button>}
-        {balance && (
-          <>
-            {/* ============= Step 1 ============= */}
+        <h3>Store an encrypted image permanently on the Arweave network.</h3>
+        {/* ============= Step 1 ============= */}
+        <>
+          <div>
+            <h3>1. Connect To The Bundlr Network</h3>
+          </div>
+          <div
+            sx={{
+              display: 'flex',
+              justifyContent: 'start',
+              alignItems: 'center',
+              height: '40px',
+              contain: 'content',
+            }}
+          >
             <div>
-              <h3>1. Connect To Bundlr</h3>
-              <h4>You are connected to bundlr</h4>
-              <h4>Your bundlr Balance: {balance}</h4>
+              <button
+                onClick={initialise}
+                disabled={!isConnected || balance || bundlrConnected === 'connecting'}
+                sx={{ cursor: !isConnected || balance || bundlrConnected === 'connecting' ? 'not-allowed' : 'pointer' }}
+              >
+                {balance ? 'You are connected' : 'Connect to Bundlr'}
+              </button>
+            </div>
+            {bundlrConnected === 'connecting' && (
+              <>
+                <div sx={{ display: 'flex', m: 3 }}>
+                  {' '}
+                  <LoadingRings />
+                </div>
+                <div>
+                  <p>Sign with your wallet...</p>
+                </div>
+              </>
+            )}
+          </div>
+          {!isConnected && (
+            <div>
+              <p sx={{ color: 'red' }}>You must first connect your wallet before you can connect to bundlr.</p>
+            </div>
+          )}
+        </>
+
+        {isConnected && balance && (
+          <>
+            <div>
+              <p>You are now connected to the bundlr network.</p>
+              <div sx={{ display: 'flex', m: 0, p: 0 }}>
+                <p>Your bundlr balance is:</p>
+                <p sx={{ fontWeight: '700', pl: 2 }}>{balance} matic</p>
+              </div>
             </div>
 
             {/* ---- fund your bundlr wallet ---- */}
@@ -293,10 +326,7 @@ export default function Home() {
 
             {/* ============= Step 2 ============= */}
             <div>
-              <h4>2. Choose An Image</h4>
-              <h5>Select the image you want to upload.</h5>
-              {/* <input type='file' onChange={onFileChange} /> */}
-              {/* <button onClick={uploadFile}>Upload File</button> */}
+              <h4>2. Select An Image</h4>
               <DropZone onDrop={onDropFile} />
             </div>
 
@@ -314,70 +344,79 @@ export default function Home() {
             )}
 
             {/* ============= Step 3 ============= */}
-            <div>
-              <h4>3. Encrypt Your Image</h4>
-              <h5>grant decryption keys to users based on their blockchain credentials and asset ownership.</h5>
-              {/* ---- fund your bundlr wallet ---- */}
-              <div style={{ padding: '10px 0 10px 0' }}>
-                <input
-                  type='text'
-                  placeholder='Image Title'
-                  onChange={(e) => setImageTitle(e.target.value)}
-                  sx={{ width: '200px' }}
-                />
+            {image && (
+              <div>
+                <h4>3. Encrypt Your Image</h4>
+                <h5>grant decryption keys to users based on their blockchain credentials and asset ownership.</h5>
+                {/* ---- fund your bundlr wallet ---- */}
+                <div style={{ padding: '10px 0 10px 0' }}>
+                  <input
+                    type='text'
+                    placeholder='Image Title'
+                    onChange={(e) => setImageTitle(e.target.value)}
+                    sx={{ width: '200px' }}
+                  />
+                </div>
+                <div style={{ padding: '10px 0 30px 0' }}>
+                  <textarea
+                    type='text'
+                    placeholder='Description'
+                    onChange={(e) => setImageDescription(e.target.value)}
+                    sx={{ width: '200px' }}
+                  />
+                </div>
+                <button onClick={() => onClickEncryptImage()}>Encrypt Image</button>
               </div>
-              <div style={{ padding: '10px 0 30px 0' }}>
-                <textarea
-                  type='text'
-                  placeholder='Description'
-                  onChange={(e) => setImageDescription(e.target.value)}
-                  sx={{ width: '200px' }}
-                />
-              </div>
-              <button onClick={() => onClickEncryptImage()}>Encrypt Image</button>
-            </div>
+            )}
 
             {/* ============= Step 4 ============= */}
-            <div>
-              <h4>4. Upload Your File</h4>
-              <h4 sx={{ color: 'red' }}>Should only show Upload AFTER encryption</h4>
-              <h5>Upload your file to the permaweb.</h5>
-              <h5>Encrypted File Size: {fileSize}</h5>
-              <h5>ESTIMATED Cost to upload encrypted file: {fileCost}</h5>
-              {fileCost && <h4>Cost to upload: {Math.round(fileCost * 1000) / 1000} MATIC</h4>}
-              <button onClick={onClickSignAndUpload}>Upload File</button>
-            </div>
-
-            {/* ---- display Arweave txId ---- */}
-            <div>
-              {txId && <h5>View the TRANSACTION on the Arweave network:</h5>}
-              {txId && (
-                <a
-                  href={`http://arweave.app/tx/${txId}`}
-                  target='_blank'
-                  rel='noreferrer'
-                >{`http://arweave.app/tx/${txId}`}</a>
-              )}
-              {txId && (
-                <h5>
-                  The Encrypted FILE: As you will see, the data is obfuscated and safe. If someone was to try and view
-                  the image, they will only get the access control conditions along with the encrypted and encoded zip
-                  and symmetric key. All they can do is downlaod the encrypted file, but not view it until it is
-                  decrypted.
-                </h5>
-              )}
-              {txId && <h5>Download the Encrypted FILE:</h5>}
-              {txId && (
-                <a
-                  href={`http://arweave.net/${txId}`}
-                  target='_blank'
-                  rel='noreferrer'
-                >{`http://arweave.net/${txId}`}</a>
-              )}
-            </div>
+            {isEncrypted === 'success' && (
+              <div>
+                <h4>4. Upload Your File</h4>
+                <h5>Upload your file to the permaweb.</h5>
+                <h5>Encrypted File Size: {fileSize}</h5>
+                <h5>ESTIMATED Cost to upload encrypted file: {fileCost}</h5>
+                {fileCost && <h4>Cost to upload: {Math.round(fileCost * 1000) / 1000} MATIC</h4>}
+                <button onClick={onClickSignAndUpload}>Upload File</button>
+              </div>
+            )}
+            {isUploaded === 'success' && (
+              <div>
+                {txId && <h5>View the TRANSACTION on the Arweave network:</h5>}
+                {txId && (
+                  <a
+                    href={`http://arweave.app/tx/${txId}`}
+                    target='_blank'
+                    rel='noreferrer'
+                  >{`http://arweave.app/tx/${txId}`}</a>
+                )}
+                {txId && (
+                  <h5>
+                    The Encrypted FILE: As you will see, the data is obfuscated and safe. If someone was to try and view
+                    the image, they will only get the access control conditions along with the encrypted and encoded zip
+                    and symmetric key. All they can do is downlaod the encrypted file, but not view it until it is
+                    decrypted.
+                  </h5>
+                )}
+                {txId && <h5>Download the Encrypted FILE:</h5>}
+                {txId && (
+                  <a
+                    href={`http://arweave.net/${txId}`}
+                    target='_blank'
+                    rel='noreferrer'
+                  >{`http://arweave.net/${txId}`}</a>
+                )}
+              </div>
+            )}
+            {isUploaded === 'error' && (
+              <div>
+                <h4 sx={{ color: 'red' }}>Upload Error</h4>
+                <h5>{uploadError}</h5>
+              </div>
+            )}
 
             {/* ============= Step 5 ============= */}
-            <div>
+            {/* <div>
               <h4>5. Decrypt Your Image</h4>
               <h5>a) Click to fetch the encrypted data from Arweave</h5>
               <button onClick={() => onFetchEncryptedData()}>{`http://arweave.net/${txId}`}</button>
@@ -395,7 +434,7 @@ export default function Home() {
               <div>
                 <Image alt='The decrypted image' src={decryptedData} width='240px' height='100%'></Image>
               </div>
-            )}
+            )} */}
           </>
         )}
       </ContainerPage>
