@@ -25,9 +25,9 @@
 
 &nbsp;
 
-<h3 align="left">
+<h4 align="left">
   PermaPic is a decentralised Next.js app deployed permanently to the permaweb (Arweave network) that allows a user to:
-</h3>
+</h4>
 &nbsp;
 
 - Encrypt and upload an image, with metadata, to Arweave
