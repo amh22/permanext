@@ -22,6 +22,8 @@ const { chains, provider } = configureChains(
   [alchemyProvider({ alchemyId: process.env.ALCHEMY_ID }), publicProvider()] // <- set RPC provider to Alchemy, and in case Alchemy does not support the chain, fall back to the public RPC URL
 )
 
+// getDefaultWallets function sets up the following wallets:
+// Rainbow, MetaMask, WalletConnect, Coinbase
 const { connectors } = getDefaultWallets({
   appName: APP_NAME,
   chains,
@@ -46,14 +48,19 @@ function App({ Component, pageProps }) {
 
   // create a function to connect to bundlr network
   async function initialiseBundlr() {
-    await ethereum.request({ method: 'eth_requestAccounts' })
-    // await window.ethereum.enable()
-
+    // We are using MetaMask to sign the connection to Bundlr
+    // Remember we have already asked a user to choose which wallet they want to connect to our dApp with (using RainbowKit in the Header)
+    // await ethereum.request({ method: 'eth_requestAccounts' })
     const provider = new providers.Web3Provider(window.ethereum)
-
     await provider._ready()
 
-    const bundlr = new WebBundlr('https://node1.bundlr.network', currency, provider)
+    // const bundlr = new WebBundlr('https://node1.bundlr.network', currency, provider)
+
+    // Our Alchemy Polygon Provider
+    const bundlr = new WebBundlr('https://node1.bundlr.network', currency, provider, {
+      providerUrl: process.env.ALCHEMY_RPC_URL,
+    })
+
     await bundlr.ready()
 
     const ownerAddress = bundlr.address // <- get owner address so we can post it as a tag when uploading to Arweave, then we can query connected wallet addresses

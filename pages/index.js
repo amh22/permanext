@@ -15,6 +15,7 @@ import { APP_NAME } from '../utils'
 import { LoadingRings } from '../components/LoadingIndictor'
 
 export default function Home() {
+  const [hasMounted, setHasMounted] = useState(false)
   const [accountAddress, setAccountAddress] = useState(null)
   const [bundlrConnected, setBundlrConnected] = useState(null)
   const [fundingAmount, setFundingAmount] = useState(null)
@@ -112,28 +113,6 @@ export default function Home() {
       fileReader.readAsDataURL(file)
     }
   }, [])
-
-  // ============= Handle Image File Selection =============
-  // function onFileChange(e) {
-  //   const file = e.target.files[0]
-
-  //   if (file) {
-  //     // 👇 give us a nice way to VIEW the IMAGE in our UI
-  //     const image = URL.createObjectURL(file)
-  //     console.log('🚀 ~ file: index.js ~ line 79~ image', image)
-  //     setImage(image) // <- now to save the FILE locally
-
-  //     // 👇 this is the encoded file sent to Arweave
-  //     let reader = new FileReader()
-  //     reader.onload = function () {
-  //       if (reader.result) {
-  //         setFile(Buffer.from(reader.result)) // <- save the file locally
-  //       }
-  //       console.log('line 87 - file:', file)
-  //     }
-  //     reader.readAsArrayBuffer(file)
-  //   }
-  // }
 
   // ============= Handle Image Encryption =============
   const onClickEncryptImage = async () => {
@@ -266,8 +245,13 @@ export default function Home() {
   }
 
   useEffect(() => {
+    setHasMounted(true)
     setAccountAddress(address)
   }, [address])
+
+  if (!hasMounted) {
+    return null
+  }
 
   return (
     <div>
