@@ -60,7 +60,6 @@ export default function Header({ children }) {
         <nav
           sx={{
             maxWidth: 'layoutPlus',
-            backgroundColor: 'pink',
           }}
         >
           <ul
